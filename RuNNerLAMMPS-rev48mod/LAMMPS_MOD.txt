@@ -1,0 +1,53 @@
+CHANGES APPLIED TO LAMMPS (22Feb13)
+-----------------------------------
+
+2013-02-28:
+-----------
+.) MORE DIGITS IN CUSTOM DUMP FILES:
+in file: dump_custom.cpp:
+        in line 119: char[3*size_one+1] --> char[8*size_one+1]
+        in line 124: "%g " --> "%24.16E "
+
+.) ZERO-PADDING FOR RESTART FILES
+in file: output.cpp
+        in line 333: "%s" BIGINT_FORMAT "%s" --> "%s%010ld%s"
+        in line 421: "%s" BIGINT_FORMAT "%s" --> "%s%010ld%s"
+
+.) ZERO-PADDING FOR NAME OF DUMP FILES
+in file: dump.cpp:
+        in line 100: "%s%d%s" --> "%s%010d%s"
+        in line 378: "%s" BIGINT_FORMAT "%s" --> "%s%010ld%s"
+
+.) MORE DIGITS IN FIX_AVE_TIME:
+in file: fix_ave_time.cpp:
+        in line 635: " %g" --> " %16.8E"
+        in line 776: " %g" --> " %16.8E"
+
+CHANGES APPLIED TO LAMMPS (7Jun13)
+-----------------------------------
+
+2014-05-27:
+-----------
+.) MORE DIGITS IN CUSTOM DUMP FILES:
+in file: dump_custom.cpp:
+        in line 119: char[3*size_one+1] --> char[8*size_one+1]
+        in line 124: "%g " --> "%24.16E "
+
+.) ZERO-PADDING FOR RESTART FILES:
+in file: output.cpp:
+        in line 333: "%s" BIGINT_FORMAT "%s" --> "%s%010ld%s"
+        in line 421: "%s" BIGINT_FORMAT "%s" --> "%s%010ld%s"
+
+.) ZERO-PADDING FOR NAME OF DUMP FILES:
+in file: dump.cpp:
+        in line 110: "%s%d%s" --> "%s%010d%s"
+        in line 388: "%s" BIGINT_FORMAT "%s" --> "%s%010ld%s"
+
+.) MORE DIGITS IN FIX_AVE_TIME:
+in file: fix_ave_time.cpp:
+        in line 635: " %g" --> " %16.8E"
+        in line 776: " %g" --> " %16.8E"
+
+.) ZERO-PADDING FOR NAME OF DATA FILES:
+in file: write_data.cpp:
+        in line 69: "%s" BIGINT_FORMAT "%s" --> "%s%010ld%s"

@@ -1,0 +1,208 @@
+###############################################################################
+# MD simulation for Cu2S with NN potential
+###############################################################################
+
+###############################################################################
+# VARIABLES
+###############################################################################
+clear
+variable dt              equal  0.002
+variable intThermo       equal  1
+variable intRestart      equal  10
+variable numSteps        equal  10
+variable runnerCutoff    equal  6.01
+variable mass1           equal  32.065
+variable mass2           equal  63.546
+variable nameStartCfg    string "startcfg/cfg_lammps_lch_144"
+variable nameRestart1    string "traj/swap1.res"
+variable nameRestart2    string "traj/swap2.res"
+variable nameRestartEnd  string "traj/endcfg.res"
+variable runnerDir       string "RuNNer"
+###############################################################################
+# SETUP
+###############################################################################
+units metal
+boundary p p p
+atom_style atomic
+read_data ${nameStartCfg}
+mass 1 ${mass1}
+mass 2 ${mass2}
+reset_timestep 0
+pair_style runner dir ${runnerDir} showew yes resetew no maxew 0
+pair_coeff * * ${runnerCutoff}
+timestep ${dt}
+restart ${intRestart} ${nameRestart1} ${nameRestart2}
+fix INT all nve
+thermo ${intThermo}
+###############################################################################
+# SIMULATION
+###############################################################################
+run ${numSteps}
+write_restart ${nameRestartEnd}
+###############################################################################
+# CLEAN UP
+###############################################################################
+unfix INT
+###############################################################################
+
+###############################################################################
+# INTEGRATORS/THERMOSTATS
+###############################################################################
+
+# NVT integrator (Nose-Hoover)
+variable startTemp       equal  300.0
+variable stopTemp        equal  500.0
+variable tDamp           equal  0.10
+fix INT all nvt temp ${startTemp} ${stopTemp} ${tDamp}
+unfix INT
+
+# temperature rescaling (add to NVE integrator)
+variable intRescaleTemp  equal  1
+variable startTemp       equal  300.0
+variable stopTemp        equal  500.0
+variable windowRescale   equal  0.0
+variable fractionRescale equal  1.0
+fix TEMP all temp/rescale ${intRescaleTemp} ${startTemp} ${stopTemp} ${windowRescale} ${fractionRescale}
+unfix TEMP
+
+# set initial velocity distribution
+variable initTemp        equal  300.0
+variable velSeed         equal  4928459
+velocity all create ${initTemp} ${velSeed}
+
+# NPT integrator (Nose-Hoover)
+variable startTemp       equal  300.0
+variable stopTemp        equal  500.0
+variable tDamp           equal  0.10
+variable startPress      equal  1.013
+variable stopPress       equal  1.013
+variable pDamp           equal  1.00
+fix INT all npt temp ${startTemp} ${stopTemp} ${tDamp} tri ${startPress} ${stopPress} ${pDamp}
+unfix INT
+
+###############################################################################
+# DUMP TRAJECTORY STATES
+###############################################################################
+
+# dump dcd trajectory file
+variable intDumpDCD      equal  10
+variable nameDumpDCD     string "traj/states.dcd"
+dump DCD all dcd ${intDumpDCD} ${nameDumpDCD}
+dump_modify DCD first yes sort id
+undump DCD
+
+# dump xyz trajectory file
+variable intDumpXYZ      equal  10
+variable nameDumpXYZ     string "traj/states.xyz"
+dump XYZ all xyz ${intDumpXYZ} ${nameDumpXYZ}
+dump_modify XYZ first yes sort id
+undump XYZ
+
+# dump custom trajectory file
+variable intDumpCustom   equal  10
+variable nameDumpCustom  string "traj/state_*"
+dump CUSTOM all custom ${intDumpCustom} ${nameDumpCustom} id type x y z vx vy vz
+dump_modify CUSTOM first yes sort id
+undump CUSTOM
+
+###############################################################################
+# DUMP PHYSICAL QUANTITIES
+###############################################################################
+
+# dump thermodynamic properties (temperature, pressure, potential energy, kinetic energy, integrator quantity)
+#
+# NOTE: to test if integrator works correctly check the following conserved quantity:
+#	conserved quantity = potential energy + kinetic energy + integrator quantity
+#	(remove f_INT from line for NVE ensemble)
+#
+variable intTD           equal  10
+variable nameTD          string "traj/td"
+variable varVolume       equal  vol
+compute KE all ke
+fix AVE_E all ave/time ${intTD} 1 ${intTD} c_thermo_temp c_thermo_press v_varVolume c_thermo_pe c_KE f_INT file ${nameTD} mode scalar
+unfix AVE_E
+uncompute KE
+
+# dump per-element mean squared displacement
+variable intMSD          equal  10
+variable nameMSD_S       string "traj/msd_S"
+variable nameMSD_Cu      string "traj/msd_Cu"
+group S  type 1
+group Cu type 2
+compute MSD_S  S  msd
+compute MSD_Cu Cu msd
+fix AVE_MSD_S  S  ave/time ${intMSD} 1 ${intMSD} c_MSD_S[1]  c_MSD_S[2]  c_MSD_S[3]  c_MSD_S[4]  file ${nameMSD_S}  mode scalar
+fix AVE_MSD_Cu Cu ave/time ${intMSD} 1 ${intMSD} c_MSD_Cu[1] c_MSD_Cu[2] c_MSD_Cu[3] c_MSD_Cu[4] file ${nameMSD_Cu} mode scalar
+unfix AVE_MSD_S
+unfix AVE_MSD_Cu
+uncompute MSD_S
+uncompute MSD_Cu
+
+# dump per-element mean squared displacement using circular buffer method
+variable intMSDCB        equal  100
+variable nbinMSDCB       equal  100
+variable nwriteMSDCB     equal  100
+variable nameMSDCB_S     string "traj/msd_S"
+variable namecbMSDCB_S   string "traj/msdcb_S"
+variable nameMSDCB_Cu    string "traj/msd_Cu"
+variable namecbMSDCB_Cu  string "traj/msdcb_Cu"
+group S  type 1
+group Cu type 2
+compute MSDCB_S  S  msdcb nint ${intMSDCB} nbin ${nbinMSDCB} nwrite ${nwriteMSDCB} file ${namecbMSDCB_S}
+compute MSDCB_Cu Cu msdcb nint ${intMSDCB} nbin ${nbinMSDCB} nwrite ${nwriteMSDCB} file ${namecbMSDCB_Cu}
+fix AVE_MSDCB_S  S  ave/time ${intMSDCB} 1 ${intMSDCB} c_MSDCB_S[1]  c_MSDCB_S[2]  c_MSDCB_S[3]  c_MSDCB_S[4]  file ${nameMSDCB_S}  mode scalar
+fix AVE_MSDCB_Cu Cu ave/time ${intMSDCB} 1 ${intMSDCB} c_MSDCB_Cu[1] c_MSDCB_Cu[2] c_MSDCB_Cu[3] c_MSDCB_Cu[4] file ${nameMSDCB_Cu} mode scalar
+unfix AVE_MSDCB_S
+unfix AVE_MSDCB_Cu
+uncompute MSDCB_S
+uncompute MSDCB_Cu
+
+# dump displacement of individual atoms
+variable intDA           equal  10
+variable nameDA          string "traj/da_*"
+group S  type 1
+group Cu type 2
+compute DA  all displace/atom
+fix AVE_DA1 all ave/atom ${intDA} 1 ${intDA} c_DA[1] 
+fix AVE_DA2 all ave/atom ${intDA} 1 ${intDA} c_DA[2] 
+fix AVE_DA3 all ave/atom ${intDA} 1 ${intDA} c_DA[3] 
+fix AVE_DA4 all ave/atom ${intDA} 1 ${intDA} c_DA[4] 
+dump DUMP_AVE_DA all custom ${intDA} ${nameDA} id f_AVE_DA1 f_AVE_DA2 f_AVE_DA3 f_AVE_DA4
+dump_modify DUMP_AVE_DA sort id
+undump DUMP_AVE_DA
+unfix AVE_DA1
+unfix AVE_DA2
+unfix AVE_DA3
+unfix AVE_DA4
+
+#dump average atom positions, velocities and forces
+variable intAAPNevery    equal  1
+variable intAAPNrepeat   equal  100
+variable intAAPNfreq     equal  100
+variable nameAAP         string "traj/aap_*"
+fix AVE_AP all ave/atom ${intAAPNevery} ${intAAPNrepeat} ${intAAPNfreq} x y z vx vy vz fx fy fz
+dump DUMP_AVE_AP all custom ${intAAPNfreq} ${nameAAP} id type f_AVE_AP[1] f_AVE_AP[2] f_AVE_AP[3] f_AVE_AP[4] f_AVE_AP[5] f_AVE_AP[6] f_AVE_AP[7] f_AVE_AP[8] f_AVE_AP[9]
+dump_modify DUMP_AVE_AP sort id
+undump DUMP_AVE_AP
+unfix AVE_AP
+
+###############################################################################
+# ENERGY MINIMIZATION
+###############################################################################
+# energy minimization
+variable relaxPress      equal  0.0
+variable eTol            equal  0.0E-4
+variable fTol            equal  1.0E-8
+variable maxIter         equal  10000
+variable maxEval         equal  100000
+fix RB all box/relax tri ${relaxPress} 
+minimize ${eTol} ${fTol} ${maxIter} ${maxEval}
+unfix RB
+
+###############################################################################
+# FROZEN ICE CUBE PROBLEM
+###############################################################################
+# periodically reset total momentum
+variable intMomentum     equal  100
+fix MOMENTUM all momentum ${intMomentum} linear 1 1 1
+unfix MOMENTUM

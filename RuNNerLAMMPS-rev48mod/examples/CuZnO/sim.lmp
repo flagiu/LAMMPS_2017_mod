@@ -1,0 +1,68 @@
+###############################################################################
+# MD simulation for CuZnO with NN potential
+###############################################################################
+
+###############################################################################
+# VARIABLES
+###############################################################################
+clear
+variable dt              equal  0.002                                                   # timestep (ps)
+variable intThermo       equal  50                                                       # screen output interval (timesteps)
+variable intRestart      equal  100                                                      # restart file interval (timesteps)
+variable numSteps        equal  10000                                                      # total number of simulation timesteps (timesteps)
+variable runnerCutoff    equal  6.01                                                    # largest symmetry function cutoff (Angstrom)
+variable mass1           equal  15.999                                                  # mass for element 1 (O)  (g/mol)
+variable mass2           equal  63.546                                                  # mass for element 2 (Cu) (g/mol)
+variable mass3           equal  65.380                                                  # mass for element 3 (Zn) (g/mol)
+variable nameStartCfg    string "startcfg/cfg_lammps.CuZnO.16.config_10"                # name of the starting configuration file
+variable nameRestart1    string "traj/swap1.res"                                        # name of restart file 1
+variable nameRestart2    string "traj/swap2.res"                                        # name of restart file 2
+variable nameRestartEnd  string "traj/endcfg.res"                                       # name of final state restart file
+variable runnerDir       string "RuNNer"                                                # directory containing RuNNer files
+# set initial velocity distribution
+variable initTemp        equal  300.0                                                   # initial temperature (K)
+variable velSeed         equal  4928459                                                 # seed for random number generator
+# NVT integrator (Nose-Hoover)
+variable startTemp       equal  300.0                                                   # starting temperature for thermostat (K)
+variable stopTemp        equal  300.0                                                   # final temperature for thermostat (K)
+variable tDamp           equal  0.10                                                    # thermostat damping factor (ps)
+# dump xyz trajectory file
+variable intDumpXYZ      equal  100                                                      # xyz dump file interval (timesteps)
+variable nameDumpXYZ     string "traj/states.xyz"                                       # xyz file name
+# dump thermodynamic properties (temperature, pressure, potential energy, kinetic energy, integrator quantity)
+variable intTD           equal  100                                                      # thermodynamics dump file interval (timesteps)
+variable nameTD          string "traj/td"                                               # thermodynamics file name
+variable varVolume       equal  vol                                                     # variable required to print volume
+variable varKE           equal  ke                                                      # variable required to print kinetic energy
+###############################################################################
+# SETUP
+###############################################################################
+units metal                                                                             # define unit system (metal = Angstrom, eV, ps, g/mol)
+boundary p p p                                                                          # set periodic boundary conditions
+atom_style atomic                                                                       # set atomic style for particles
+read_data ${nameStartCfg}                                                               # read start configuration
+mass 1 ${mass1}                                                                         # set mass for element 1
+mass 2 ${mass2}                                                                         # set mass for element 2
+mass 3 ${mass3}                                                                         # set mass for element 3
+pair_style runner dir ${runnerDir} showew yes resetew no maxew 0                        # set up pair style runner
+pair_coeff * * ${runnerCutoff}                                                          # set up pair style coefficients
+timestep ${dt}                                                                          # set timestep
+restart ${intRestart} ${nameRestart1} ${nameRestart2}                                   # write alternating binary restart files
+velocity all create ${initTemp} ${velSeed}                                              # create initial velocities
+fix INT all nvt temp ${startTemp} ${stopTemp} ${tDamp}                                  # set up integrator
+fix AVE_TD all ave/time ${intTD} 1 ${intTD} c_thermo_temp c_thermo_press v_varVolume c_thermo_pe v_varKE f_INT file ${nameTD} mode scalar       # set up thermodynamic properties output
+dump XYZ all xyz ${intDumpXYZ} ${nameDumpXYZ}                                           # set up xyz dump
+dump_modify XYZ first yes sort id                                                       # modify xyz dump
+thermo ${intThermo}                                                                     # set screen output
+###############################################################################
+# SIMULATION
+###############################################################################
+run ${numSteps}                                                                         # RUN SIMULATION
+write_restart ${nameRestartEnd}                                                         # write final configuration (binary)
+###############################################################################
+# CLEAN UP
+###############################################################################
+undump XYZ
+unfix AVE_TD
+unfix INT
+###############################################################################

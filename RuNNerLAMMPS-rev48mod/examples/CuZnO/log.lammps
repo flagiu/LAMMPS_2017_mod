@@ -1,0 +1,1414 @@
+LAMMPS (11 Aug 2017)
+###############################################################################
+# MD simulation for CuZnO with NN potential
+###############################################################################
+
+###############################################################################
+# VARIABLES
+###############################################################################
+clear
+variable dt              equal  0.002                                                   # timestep (ps)
+variable intThermo       equal  50                                                       # screen output interval (timesteps)
+variable intRestart      equal  100                                                      # restart file interval (timesteps)
+variable numSteps        equal  10000                                                      # total number of simulation timesteps (timesteps)
+variable runnerCutoff    equal  6.01                                                    # largest symmetry function cutoff (Angstrom)
+variable mass1           equal  15.999                                                  # mass for element 1 (O)  (g/mol)
+variable mass2           equal  63.546                                                  # mass for element 2 (Cu) (g/mol)
+variable mass3           equal  65.380                                                  # mass for element 3 (Zn) (g/mol)
+variable nameStartCfg    string "startcfg/cfg_lammps.CuZnO.16.config_10"                # name of the starting configuration file
+variable nameRestart1    string "traj/swap1.res"                                        # name of restart file 1
+variable nameRestart2    string "traj/swap2.res"                                        # name of restart file 2
+variable nameRestartEnd  string "traj/endcfg.res"                                       # name of final state restart file
+variable runnerDir       string "RuNNer"                                                # directory containing RuNNer files
+# set initial velocity distribution
+variable initTemp        equal  300.0                                                   # initial temperature (K)
+variable velSeed         equal  4928459                                                 # seed for random number generator
+# NVT integrator (Nose-Hoover)
+variable startTemp       equal  300.0                                                   # starting temperature for thermostat (K)
+variable stopTemp        equal  300.0                                                   # final temperature for thermostat (K)
+variable tDamp           equal  0.10                                                    # thermostat damping factor (ps)
+# dump xyz trajectory file
+variable intDumpXYZ      equal  100                                                      # xyz dump file interval (timesteps)
+variable nameDumpXYZ     string "traj/states.xyz"                                       # xyz file name
+# dump thermodynamic properties (temperature, pressure, potential energy, kinetic energy, integrator quantity)
+variable intTD           equal  100                                                      # thermodynamics dump file interval (timesteps)
+variable nameTD          string "traj/td"                                               # thermodynamics file name
+variable varVolume       equal  vol                                                     # variable required to print volume
+variable varKE           equal  ke                                                      # variable required to print kinetic energy
+###############################################################################
+# SETUP
+###############################################################################
+units metal                                                                             # define unit system (metal = Angstrom, eV, ps, g/mol)
+boundary p p p                                                                          # set periodic boundary conditions
+atom_style atomic                                                                       # set atomic style for particles
+read_data ${nameStartCfg}                                                               # read start configuration
+read_data startcfg/cfg_lammps.CuZnO.16.config_10                                                               
+  orthogonal box = (0 0 0) to (4 4 24)
+  1 by 2 by 6 MPI processor grid
+  reading atoms ...
+  16 atoms
+mass 1 ${mass1}                                                                         # set mass for element 1
+mass 1 15.999                                                                         
+mass 2 ${mass2}                                                                         # set mass for element 2
+mass 2 63.546                                                                         
+mass 3 ${mass3}                                                                         # set mass for element 3
+mass 3 65.38                                                                         
+pair_style runner dir ${runnerDir} showew yes resetew no maxew 0                        # set up pair style runner
+pair_style runner dir RuNNer showew yes resetew no maxew 0                        
+RuNNer pair style directory           : RuNNer/
+Show extrapolation warnings           : yes
+Show extrapolation warning summary    : no
+Reset extrapolation warning counter   : no
+Maximum allowed extrapolation warnings: 0
+pair_coeff * * ${runnerCutoff}                                                          # set up pair style coefficients
+pair_coeff * * 6.01                                                          
+timestep ${dt}                                                                          # set timestep
+timestep 0.002                                                                          
+restart ${intRestart} ${nameRestart1} ${nameRestart2}                                   # write alternating binary restart files
+restart 100 ${nameRestart1} ${nameRestart2}                                   
+restart 100 traj/swap1.res ${nameRestart2}                                   
+restart 100 traj/swap1.res traj/swap2.res                                   
+velocity all create ${initTemp} ${velSeed}                                              # create initial velocities
+velocity all create 300 ${velSeed}                                              
+velocity all create 300 4928459                                              
+fix INT all nvt temp ${startTemp} ${stopTemp} ${tDamp}                                  # set up integrator
+fix INT all nvt temp 300 ${stopTemp} ${tDamp}                                  
+fix INT all nvt temp 300 300 ${tDamp}                                  
+fix INT all nvt temp 300 300 0.1                                  
+fix AVE_TD all ave/time ${intTD} 1 ${intTD} c_thermo_temp c_thermo_press v_varVolume c_thermo_pe v_varKE f_INT file ${nameTD} mode scalar       # set up thermodynamic properties output
+fix AVE_TD all ave/time 100 1 ${intTD} c_thermo_temp c_thermo_press v_varVolume c_thermo_pe v_varKE f_INT file ${nameTD} mode scalar       
+fix AVE_TD all ave/time 100 1 100 c_thermo_temp c_thermo_press v_varVolume c_thermo_pe v_varKE f_INT file ${nameTD} mode scalar       
+fix AVE_TD all ave/time 100 1 100 c_thermo_temp c_thermo_press v_varVolume c_thermo_pe v_varKE f_INT file traj/td mode scalar       
+dump XYZ all xyz ${intDumpXYZ} ${nameDumpXYZ}                                           # set up xyz dump
+dump XYZ all xyz 100 ${nameDumpXYZ}                                           
+dump XYZ all xyz 100 traj/states.xyz                                           
+dump_modify XYZ first yes sort id                                                       # modify xyz dump
+thermo ${intThermo}                                                                     # set screen output
+thermo 50                                                                     
+###############################################################################
+# SIMULATION
+###############################################################################
+run ${numSteps}                                                                         # RUN SIMULATION
+run 10000                                                                         
+-----------------------------------------------------------------------
+Starting RuNNer pair style setup...
+-----------------------------------------------------------------------
+Analyzing input.nn...
+-----------------------------------------------------------------------
+Number of elements:  3
+Element  0:  O ( 8)
+Element  1: Cu (29)
+Element  2: Zn (30)
+-----------------------------------------------------------------------
+Free atom energy of element  2 (Zn) =  -1.80501857E+03
+-----------------------------------------------------------------------
+Free atom energy of element  1 (Cu) =  -1.66262770E+03
+-----------------------------------------------------------------------
+Free atom energy of element  0 ( O) =  -7.51009549E+01
+-----------------------------------------------------------------------
+Number of hidden layers:  2
+-----------------------------------------------------------------------
+Element  0 ( O): layer  0:  10 nodes
+Element  0 ( O): layer  1:  10 nodes
+Element  0 ( O): layer  2:   1 nodes
+Element  1 (Cu): layer  0:  10 nodes
+Element  1 (Cu): layer  1:  10 nodes
+Element  1 (Cu): layer  2:   1 nodes
+Element  2 (Zn): layer  0:  10 nodes
+Element  2 (Zn): layer  1:  10 nodes
+Element  2 (Zn): layer  2:   1 nodes
+Element  0 ( O): layer  0: activation function:  2
+Element  0 ( O): layer  1: activation function:  2
+Element  0 ( O): layer  2: activation function:  1
+Element  1 (Cu): layer  0: activation function:  2
+Element  1 (Cu): layer  1: activation function:  2
+Element  1 (Cu): layer  2: activation function:  1
+Element  2 (Zn): layer  0: activation function:  2
+Element  2 (Zn): layer  1: activation function:  2
+Element  2 (Zn): layer  2: activation function:  1
+-----------------------------------------------------------------------
+scale_symmetry_functions detected.
+-----------------------------------------------------------------------
+normalize_nodes detected.
+-----------------------------------------------------------------------
+scalemin = 0.000000
+-----------------------------------------------------------------------
+scalemax = 1.000000
+-----------------------------------------------------------------------
+Element  0 ( O): 156 symmetry functions
+Element  1 (Cu): 156 symmetry functions
+Element  2 (Zn): 156 symmetry functions
+-----------------------------------------------------------------------
+Finished analyzing input.nn.
+-----------------------------------------------------------------------
+Element  0 ( O): layer  0 allocated, dim: (156, 10), act. func.:  2
+Element  0 ( O): layer  1 allocated, dim: ( 10, 10), act. func.:  2
+Element  0 ( O): layer  2 allocated, dim: ( 10,  1), act. func.:  1
+Element  1 (Cu): layer  0 allocated, dim: (156, 10), act. func.:  2
+Element  1 (Cu): layer  1 allocated, dim: ( 10, 10), act. func.:  2
+Element  1 (Cu): layer  2 allocated, dim: ( 10,  1), act. func.:  1
+Element  2 (Zn): layer  0 allocated, dim: (156, 10), act. func.:  2
+Element  2 (Zn): layer  1 allocated, dim: ( 10, 10), act. func.:  2
+Element  2 (Zn): layer  2 allocated, dim: ( 10,  1), act. func.:  1
+-----------------------------------------------------------------------
+Element  0 ( O): Reading RuNNer/weights.008.data...
+Element  0 ( O): weights:   1670, bias:   21, total:   1691
+Element  1 (Cu): Reading RuNNer/weights.029.data...
+Element  1 (Cu): weights:   1670, bias:   21, total:   1691
+Element  2 (Zn): Reading RuNNer/weights.030.data...
+Element  2 (Zn): weights:   1670, bias:   21, total:   1691
+-----------------------------------------------------------------------
+Sorting according to   type.
+Sorting according to     rc.
+Sorting according to    eta.
+Sorting according to   zeta.
+Sorting according to lambda.
+Sorting according to     rs.
+Sorting according to     e1.
+Sorting according to     e2.
+Printing symmetry functions...
+-----------------------------------------------------------------------
+short range atomic symmetry functions element  O
+-----------------------------------------------------------------------
+   1  O  2  O              0.001   0.000  12.000
+   2  O  2 Cu              0.001   0.000  12.000
+   3  O  2 Zn              0.001   0.000  12.000
+   4  O  2  O              0.010   0.000  12.000
+   5  O  2 Cu              0.010   0.000  12.000
+   6  O  2 Zn              0.010   0.000  12.000
+   7  O  2  O              0.020   0.000  12.000
+   8  O  2 Cu              0.020   0.000  12.000
+   9  O  2 Zn              0.020   0.000  12.000
+  10  O  2  O              0.035   0.000  12.000
+  11  O  2 Cu              0.035   0.000  12.000
+  12  O  2 Zn              0.035   0.000  12.000
+  13  O  2  O              0.060   0.000  12.000
+  14  O  2 Cu              0.060   0.000  12.000
+  15  O  2 Zn              0.060   0.000  12.000
+  16  O  2  O              0.100   0.000  12.000
+  17  O  2 Cu              0.100   0.000  12.000
+  18  O  2 Zn              0.100   0.000  12.000
+  19  O  2  O              0.200   0.000  12.000
+  20  O  2 Cu              0.200   0.000  12.000
+  21  O  2 Zn              0.200   0.000  12.000
+  22  O  2  O              0.400   0.000  12.000
+  23  O  2 Cu              0.400   0.000  12.000
+  24  O  2 Zn              0.400   0.000  12.000
+  25  O  3  O  O   0.000  -1.000   1.000  12.000
+  26  O  3  O Cu   0.000  -1.000   1.000  12.000
+  27  O  3  O Zn   0.000  -1.000   1.000  12.000
+  28  O  3 Cu Cu   0.000  -1.000   1.000  12.000
+  29  O  3 Cu Zn   0.000  -1.000   1.000  12.000
+  30  O  3 Zn Zn   0.000  -1.000   1.000  12.000
+  31  O  3  O  O   0.000   1.000   1.000  12.000
+  32  O  3  O Cu   0.000   1.000   1.000  12.000
+  33  O  3  O Zn   0.000   1.000   1.000  12.000
+  34  O  3 Cu Cu   0.000   1.000   1.000  12.000
+  35  O  3 Cu Zn   0.000   1.000   1.000  12.000
+  36  O  3 Zn Zn   0.000   1.000   1.000  12.000
+  37  O  3  O  O   0.000  -1.000   2.000  12.000
+  38  O  3  O Cu   0.000  -1.000   2.000  12.000
+  39  O  3  O Zn   0.000  -1.000   2.000  12.000
+  40  O  3 Cu Cu   0.000  -1.000   2.000  12.000
+  41  O  3 Cu Zn   0.000  -1.000   2.000  12.000
+  42  O  3 Zn Zn   0.000  -1.000   2.000  12.000
+  43  O  3  O  O   0.000   1.000   2.000  12.000
+  44  O  3  O Cu   0.000   1.000   2.000  12.000
+  45  O  3  O Zn   0.000   1.000   2.000  12.000
+  46  O  3 Cu Cu   0.000   1.000   2.000  12.000
+  47  O  3 Cu Zn   0.000   1.000   2.000  12.000
+  48  O  3 Zn Zn   0.000   1.000   2.000  12.000
+  49  O  3  O  O   0.003  -1.000   1.000  12.000
+  50  O  3  O Cu   0.003  -1.000   1.000  12.000
+  51  O  3  O Zn   0.003  -1.000   1.000  12.000
+  52  O  3 Cu Cu   0.003  -1.000   1.000  12.000
+  53  O  3 Cu Zn   0.003  -1.000   1.000  12.000
+  54  O  3 Zn Zn   0.003  -1.000   1.000  12.000
+  55  O  3  O  O   0.003   1.000   1.000  12.000
+  56  O  3  O Cu   0.003   1.000   1.000  12.000
+  57  O  3  O Zn   0.003   1.000   1.000  12.000
+  58  O  3 Cu Cu   0.003   1.000   1.000  12.000
+  59  O  3 Cu Zn   0.003   1.000   1.000  12.000
+  60  O  3 Zn Zn   0.003   1.000   1.000  12.000
+  61  O  3  O  O   0.003  -1.000   2.000  12.000
+  62  O  3  O Cu   0.003  -1.000   2.000  12.000
+  63  O  3  O Zn   0.003  -1.000   2.000  12.000
+  64  O  3 Cu Cu   0.003  -1.000   2.000  12.000
+  65  O  3 Cu Zn   0.003  -1.000   2.000  12.000
+  66  O  3 Zn Zn   0.003  -1.000   2.000  12.000
+  67  O  3  O  O   0.003   1.000   2.000  12.000
+  68  O  3  O Cu   0.003   1.000   2.000  12.000
+  69  O  3  O Zn   0.003   1.000   2.000  12.000
+  70  O  3 Cu Cu   0.003   1.000   2.000  12.000
+  71  O  3 Cu Zn   0.003   1.000   2.000  12.000
+  72  O  3 Zn Zn   0.003   1.000   2.000  12.000
+  73  O  3  O  O   0.008   1.000   1.000  12.000
+  74  O  3  O Cu   0.008   1.000   1.000  12.000
+  75  O  3  O Zn   0.008   1.000   1.000  12.000
+  76  O  3 Cu Cu   0.008   1.000   1.000  12.000
+  77  O  3 Cu Zn   0.008   1.000   1.000  12.000
+  78  O  3 Zn Zn   0.008   1.000   1.000  12.000
+  79  O  3  O  O   0.008   1.000   2.000  12.000
+  80  O  3  O Cu   0.008   1.000   2.000  12.000
+  81  O  3  O Zn   0.008   1.000   2.000  12.000
+  82  O  3 Cu Cu   0.008   1.000   2.000  12.000
+  83  O  3 Cu Zn   0.008   1.000   2.000  12.000
+  84  O  3 Zn Zn   0.008   1.000   2.000  12.000
+  85  O  3  O  O   0.015   1.000   1.000  12.000
+  86  O  3  O Cu   0.015   1.000   1.000  12.000
+  87  O  3  O Zn   0.015   1.000   1.000  12.000
+  88  O  3 Cu Cu   0.015   1.000   1.000  12.000
+  89  O  3 Cu Zn   0.015   1.000   1.000  12.000
+  90  O  3 Zn Zn   0.015   1.000   1.000  12.000
+  91  O  3  O  O   0.015   1.000   2.000  12.000
+  92  O  3  O Cu   0.015   1.000   2.000  12.000
+  93  O  3  O Zn   0.015   1.000   2.000  12.000
+  94  O  3 Cu Cu   0.015   1.000   2.000  12.000
+  95  O  3 Cu Zn   0.015   1.000   2.000  12.000
+  96  O  3 Zn Zn   0.015   1.000   2.000  12.000
+  97  O  3  O  O   0.015   1.000   4.000  12.000
+  98  O  3  O Cu   0.015   1.000   4.000  12.000
+  99  O  3  O Zn   0.015   1.000   4.000  12.000
+ 100  O  3 Cu Cu   0.015   1.000   4.000  12.000
+ 101  O  3 Cu Zn   0.015   1.000   4.000  12.000
+ 102  O  3 Zn Zn   0.015   1.000   4.000  12.000
+ 103  O  3  O  O   0.015   1.000  16.000  12.000
+ 104  O  3  O Cu   0.015   1.000  16.000  12.000
+ 105  O  3  O Zn   0.015   1.000  16.000  12.000
+ 106  O  3 Cu Cu   0.015   1.000  16.000  12.000
+ 107  O  3 Cu Zn   0.015   1.000  16.000  12.000
+ 108  O  3 Zn Zn   0.015   1.000  16.000  12.000
+ 109  O  3  O  O   0.025   1.000   1.000  12.000
+ 110  O  3  O Cu   0.025   1.000   1.000  12.000
+ 111  O  3  O Zn   0.025   1.000   1.000  12.000
+ 112  O  3 Cu Cu   0.025   1.000   1.000  12.000
+ 113  O  3 Cu Zn   0.025   1.000   1.000  12.000
+ 114  O  3 Zn Zn   0.025   1.000   1.000  12.000
+ 115  O  3  O  O   0.025   1.000   2.000  12.000
+ 116  O  3  O Cu   0.025   1.000   2.000  12.000
+ 117  O  3  O Zn   0.025   1.000   2.000  12.000
+ 118  O  3 Cu Cu   0.025   1.000   2.000  12.000
+ 119  O  3 Cu Zn   0.025   1.000   2.000  12.000
+ 120  O  3 Zn Zn   0.025   1.000   2.000  12.000
+ 121  O  3  O  O   0.025   1.000   4.000  12.000
+ 122  O  3  O Cu   0.025   1.000   4.000  12.000
+ 123  O  3  O Zn   0.025   1.000   4.000  12.000
+ 124  O  3 Cu Cu   0.025   1.000   4.000  12.000
+ 125  O  3 Cu Zn   0.025   1.000   4.000  12.000
+ 126  O  3 Zn Zn   0.025   1.000   4.000  12.000
+ 127  O  3  O  O   0.025   1.000  16.000  12.000
+ 128  O  3  O Cu   0.025   1.000  16.000  12.000
+ 129  O  3  O Zn   0.025   1.000  16.000  12.000
+ 130  O  3 Cu Cu   0.025   1.000  16.000  12.000
+ 131  O  3 Cu Zn   0.025   1.000  16.000  12.000
+ 132  O  3 Zn Zn   0.025   1.000  16.000  12.000
+ 133  O  3  O  O   0.045   1.000   1.000  12.000
+ 134  O  3  O Cu   0.045   1.000   1.000  12.000
+ 135  O  3  O Zn   0.045   1.000   1.000  12.000
+ 136  O  3 Cu Cu   0.045   1.000   1.000  12.000
+ 137  O  3 Cu Zn   0.045   1.000   1.000  12.000
+ 138  O  3 Zn Zn   0.045   1.000   1.000  12.000
+ 139  O  3  O  O   0.045   1.000   2.000  12.000
+ 140  O  3  O Cu   0.045   1.000   2.000  12.000
+ 141  O  3  O Zn   0.045   1.000   2.000  12.000
+ 142  O  3 Cu Cu   0.045   1.000   2.000  12.000
+ 143  O  3 Cu Zn   0.045   1.000   2.000  12.000
+ 144  O  3 Zn Zn   0.045   1.000   2.000  12.000
+ 145  O  3  O  O   0.045   1.000   4.000  12.000
+ 146  O  3  O Cu   0.045   1.000   4.000  12.000
+ 147  O  3  O Zn   0.045   1.000   4.000  12.000
+ 148  O  3 Cu Cu   0.045   1.000   4.000  12.000
+ 149  O  3 Cu Zn   0.045   1.000   4.000  12.000
+ 150  O  3 Zn Zn   0.045   1.000   4.000  12.000
+ 151  O  3  O  O   0.045   1.000  16.000  12.000
+ 152  O  3  O Cu   0.045   1.000  16.000  12.000
+ 153  O  3  O Zn   0.045   1.000  16.000  12.000
+ 154  O  3 Cu Cu   0.045   1.000  16.000  12.000
+ 155  O  3 Cu Zn   0.045   1.000  16.000  12.000
+ 156  O  3 Zn Zn   0.045   1.000  16.000  12.000
+-----------------------------------------------------------------------
+short range atomic symmetry functions element Cu
+-----------------------------------------------------------------------
+   1 Cu  2  O              0.001   0.000  12.000
+   2 Cu  2 Cu              0.001   0.000  12.000
+   3 Cu  2 Zn              0.001   0.000  12.000
+   4 Cu  2  O              0.010   0.000  12.000
+   5 Cu  2 Cu              0.010   0.000  12.000
+   6 Cu  2 Zn              0.010   0.000  12.000
+   7 Cu  2  O              0.020   0.000  12.000
+   8 Cu  2 Cu              0.020   0.000  12.000
+   9 Cu  2 Zn              0.020   0.000  12.000
+  10 Cu  2  O              0.035   0.000  12.000
+  11 Cu  2 Cu              0.035   0.000  12.000
+  12 Cu  2 Zn              0.035   0.000  12.000
+  13 Cu  2  O              0.060   0.000  12.000
+  14 Cu  2 Cu              0.060   0.000  12.000
+  15 Cu  2 Zn              0.060   0.000  12.000
+  16 Cu  2  O              0.100   0.000  12.000
+  17 Cu  2 Cu              0.100   0.000  12.000
+  18 Cu  2 Zn              0.100   0.000  12.000
+  19 Cu  2  O              0.200   0.000  12.000
+  20 Cu  2 Cu              0.200   0.000  12.000
+  21 Cu  2 Zn              0.200   0.000  12.000
+  22 Cu  2  O              0.400   0.000  12.000
+  23 Cu  2 Cu              0.400   0.000  12.000
+  24 Cu  2 Zn              0.400   0.000  12.000
+  25 Cu  3  O  O   0.000  -1.000   1.000  12.000
+  26 Cu  3  O Cu   0.000  -1.000   1.000  12.000
+  27 Cu  3  O Zn   0.000  -1.000   1.000  12.000
+  28 Cu  3 Cu Cu   0.000  -1.000   1.000  12.000
+  29 Cu  3 Cu Zn   0.000  -1.000   1.000  12.000
+  30 Cu  3 Zn Zn   0.000  -1.000   1.000  12.000
+  31 Cu  3  O  O   0.000   1.000   1.000  12.000
+  32 Cu  3  O Cu   0.000   1.000   1.000  12.000
+  33 Cu  3  O Zn   0.000   1.000   1.000  12.000
+  34 Cu  3 Cu Cu   0.000   1.000   1.000  12.000
+  35 Cu  3 Cu Zn   0.000   1.000   1.000  12.000
+  36 Cu  3 Zn Zn   0.000   1.000   1.000  12.000
+  37 Cu  3  O  O   0.000  -1.000   2.000  12.000
+  38 Cu  3  O Cu   0.000  -1.000   2.000  12.000
+  39 Cu  3  O Zn   0.000  -1.000   2.000  12.000
+  40 Cu  3 Cu Cu   0.000  -1.000   2.000  12.000
+  41 Cu  3 Cu Zn   0.000  -1.000   2.000  12.000
+  42 Cu  3 Zn Zn   0.000  -1.000   2.000  12.000
+  43 Cu  3  O  O   0.000   1.000   2.000  12.000
+  44 Cu  3  O Cu   0.000   1.000   2.000  12.000
+  45 Cu  3  O Zn   0.000   1.000   2.000  12.000
+  46 Cu  3 Cu Cu   0.000   1.000   2.000  12.000
+  47 Cu  3 Cu Zn   0.000   1.000   2.000  12.000
+  48 Cu  3 Zn Zn   0.000   1.000   2.000  12.000
+  49 Cu  3  O  O   0.003  -1.000   1.000  12.000
+  50 Cu  3  O Cu   0.003  -1.000   1.000  12.000
+  51 Cu  3  O Zn   0.003  -1.000   1.000  12.000
+  52 Cu  3 Cu Cu   0.003  -1.000   1.000  12.000
+  53 Cu  3 Cu Zn   0.003  -1.000   1.000  12.000
+  54 Cu  3 Zn Zn   0.003  -1.000   1.000  12.000
+  55 Cu  3  O  O   0.003   1.000   1.000  12.000
+  56 Cu  3  O Cu   0.003   1.000   1.000  12.000
+  57 Cu  3  O Zn   0.003   1.000   1.000  12.000
+  58 Cu  3 Cu Cu   0.003   1.000   1.000  12.000
+  59 Cu  3 Cu Zn   0.003   1.000   1.000  12.000
+  60 Cu  3 Zn Zn   0.003   1.000   1.000  12.000
+  61 Cu  3  O  O   0.003  -1.000   2.000  12.000
+  62 Cu  3  O Cu   0.003  -1.000   2.000  12.000
+  63 Cu  3  O Zn   0.003  -1.000   2.000  12.000
+  64 Cu  3 Cu Cu   0.003  -1.000   2.000  12.000
+  65 Cu  3 Cu Zn   0.003  -1.000   2.000  12.000
+  66 Cu  3 Zn Zn   0.003  -1.000   2.000  12.000
+  67 Cu  3  O  O   0.003   1.000   2.000  12.000
+  68 Cu  3  O Cu   0.003   1.000   2.000  12.000
+  69 Cu  3  O Zn   0.003   1.000   2.000  12.000
+  70 Cu  3 Cu Cu   0.003   1.000   2.000  12.000
+  71 Cu  3 Cu Zn   0.003   1.000   2.000  12.000
+  72 Cu  3 Zn Zn   0.003   1.000   2.000  12.000
+  73 Cu  3  O  O   0.008   1.000   1.000  12.000
+  74 Cu  3  O Cu   0.008   1.000   1.000  12.000
+  75 Cu  3  O Zn   0.008   1.000   1.000  12.000
+  76 Cu  3 Cu Cu   0.008   1.000   1.000  12.000
+  77 Cu  3 Cu Zn   0.008   1.000   1.000  12.000
+  78 Cu  3 Zn Zn   0.008   1.000   1.000  12.000
+  79 Cu  3  O  O   0.008   1.000   2.000  12.000
+  80 Cu  3  O Cu   0.008   1.000   2.000  12.000
+  81 Cu  3  O Zn   0.008   1.000   2.000  12.000
+  82 Cu  3 Cu Cu   0.008   1.000   2.000  12.000
+  83 Cu  3 Cu Zn   0.008   1.000   2.000  12.000
+  84 Cu  3 Zn Zn   0.008   1.000   2.000  12.000
+  85 Cu  3  O  O   0.015   1.000   1.000  12.000
+  86 Cu  3  O Cu   0.015   1.000   1.000  12.000
+  87 Cu  3  O Zn   0.015   1.000   1.000  12.000
+  88 Cu  3 Cu Cu   0.015   1.000   1.000  12.000
+  89 Cu  3 Cu Zn   0.015   1.000   1.000  12.000
+  90 Cu  3 Zn Zn   0.015   1.000   1.000  12.000
+  91 Cu  3  O  O   0.015   1.000   2.000  12.000
+  92 Cu  3  O Cu   0.015   1.000   2.000  12.000
+  93 Cu  3  O Zn   0.015   1.000   2.000  12.000
+  94 Cu  3 Cu Cu   0.015   1.000   2.000  12.000
+  95 Cu  3 Cu Zn   0.015   1.000   2.000  12.000
+  96 Cu  3 Zn Zn   0.015   1.000   2.000  12.000
+  97 Cu  3  O  O   0.015   1.000   4.000  12.000
+  98 Cu  3  O Cu   0.015   1.000   4.000  12.000
+  99 Cu  3  O Zn   0.015   1.000   4.000  12.000
+ 100 Cu  3 Cu Cu   0.015   1.000   4.000  12.000
+ 101 Cu  3 Cu Zn   0.015   1.000   4.000  12.000
+ 102 Cu  3 Zn Zn   0.015   1.000   4.000  12.000
+ 103 Cu  3  O  O   0.015   1.000  16.000  12.000
+ 104 Cu  3  O Cu   0.015   1.000  16.000  12.000
+ 105 Cu  3  O Zn   0.015   1.000  16.000  12.000
+ 106 Cu  3 Cu Cu   0.015   1.000  16.000  12.000
+ 107 Cu  3 Cu Zn   0.015   1.000  16.000  12.000
+ 108 Cu  3 Zn Zn   0.015   1.000  16.000  12.000
+ 109 Cu  3  O  O   0.025   1.000   1.000  12.000
+ 110 Cu  3  O Cu   0.025   1.000   1.000  12.000
+ 111 Cu  3  O Zn   0.025   1.000   1.000  12.000
+ 112 Cu  3 Cu Cu   0.025   1.000   1.000  12.000
+ 113 Cu  3 Cu Zn   0.025   1.000   1.000  12.000
+ 114 Cu  3 Zn Zn   0.025   1.000   1.000  12.000
+ 115 Cu  3  O  O   0.025   1.000   2.000  12.000
+ 116 Cu  3  O Cu   0.025   1.000   2.000  12.000
+ 117 Cu  3  O Zn   0.025   1.000   2.000  12.000
+ 118 Cu  3 Cu Cu   0.025   1.000   2.000  12.000
+ 119 Cu  3 Cu Zn   0.025   1.000   2.000  12.000
+ 120 Cu  3 Zn Zn   0.025   1.000   2.000  12.000
+ 121 Cu  3  O  O   0.025   1.000   4.000  12.000
+ 122 Cu  3  O Cu   0.025   1.000   4.000  12.000
+ 123 Cu  3  O Zn   0.025   1.000   4.000  12.000
+ 124 Cu  3 Cu Cu   0.025   1.000   4.000  12.000
+ 125 Cu  3 Cu Zn   0.025   1.000   4.000  12.000
+ 126 Cu  3 Zn Zn   0.025   1.000   4.000  12.000
+ 127 Cu  3  O  O   0.025   1.000  16.000  12.000
+ 128 Cu  3  O Cu   0.025   1.000  16.000  12.000
+ 129 Cu  3  O Zn   0.025   1.000  16.000  12.000
+ 130 Cu  3 Cu Cu   0.025   1.000  16.000  12.000
+ 131 Cu  3 Cu Zn   0.025   1.000  16.000  12.000
+ 132 Cu  3 Zn Zn   0.025   1.000  16.000  12.000
+ 133 Cu  3  O  O   0.045   1.000   1.000  12.000
+ 134 Cu  3  O Cu   0.045   1.000   1.000  12.000
+ 135 Cu  3  O Zn   0.045   1.000   1.000  12.000
+ 136 Cu  3 Cu Cu   0.045   1.000   1.000  12.000
+ 137 Cu  3 Cu Zn   0.045   1.000   1.000  12.000
+ 138 Cu  3 Zn Zn   0.045   1.000   1.000  12.000
+ 139 Cu  3  O  O   0.045   1.000   2.000  12.000
+ 140 Cu  3  O Cu   0.045   1.000   2.000  12.000
+ 141 Cu  3  O Zn   0.045   1.000   2.000  12.000
+ 142 Cu  3 Cu Cu   0.045   1.000   2.000  12.000
+ 143 Cu  3 Cu Zn   0.045   1.000   2.000  12.000
+ 144 Cu  3 Zn Zn   0.045   1.000   2.000  12.000
+ 145 Cu  3  O  O   0.045   1.000   4.000  12.000
+ 146 Cu  3  O Cu   0.045   1.000   4.000  12.000
+ 147 Cu  3  O Zn   0.045   1.000   4.000  12.000
+ 148 Cu  3 Cu Cu   0.045   1.000   4.000  12.000
+ 149 Cu  3 Cu Zn   0.045   1.000   4.000  12.000
+ 150 Cu  3 Zn Zn   0.045   1.000   4.000  12.000
+ 151 Cu  3  O  O   0.045   1.000  16.000  12.000
+ 152 Cu  3  O Cu   0.045   1.000  16.000  12.000
+ 153 Cu  3  O Zn   0.045   1.000  16.000  12.000
+ 154 Cu  3 Cu Cu   0.045   1.000  16.000  12.000
+ 155 Cu  3 Cu Zn   0.045   1.000  16.000  12.000
+ 156 Cu  3 Zn Zn   0.045   1.000  16.000  12.000
+-----------------------------------------------------------------------
+short range atomic symmetry functions element Zn
+-----------------------------------------------------------------------
+   1 Zn  2  O              0.001   0.000  12.000
+   2 Zn  2 Cu              0.001   0.000  12.000
+   3 Zn  2 Zn              0.001   0.000  12.000
+   4 Zn  2  O              0.010   0.000  12.000
+   5 Zn  2 Cu              0.010   0.000  12.000
+   6 Zn  2 Zn              0.010   0.000  12.000
+   7 Zn  2  O              0.020   0.000  12.000
+   8 Zn  2 Cu              0.020   0.000  12.000
+   9 Zn  2 Zn              0.020   0.000  12.000
+  10 Zn  2  O              0.035   0.000  12.000
+  11 Zn  2 Cu              0.035   0.000  12.000
+  12 Zn  2 Zn              0.035   0.000  12.000
+  13 Zn  2  O              0.060   0.000  12.000
+  14 Zn  2 Cu              0.060   0.000  12.000
+  15 Zn  2 Zn              0.060   0.000  12.000
+  16 Zn  2  O              0.100   0.000  12.000
+  17 Zn  2 Cu              0.100   0.000  12.000
+  18 Zn  2 Zn              0.100   0.000  12.000
+  19 Zn  2  O              0.200   0.000  12.000
+  20 Zn  2 Cu              0.200   0.000  12.000
+  21 Zn  2 Zn              0.200   0.000  12.000
+  22 Zn  2  O              0.400   0.000  12.000
+  23 Zn  2 Cu              0.400   0.000  12.000
+  24 Zn  2 Zn              0.400   0.000  12.000
+  25 Zn  3  O  O   0.000  -1.000   1.000  12.000
+  26 Zn  3  O Cu   0.000  -1.000   1.000  12.000
+  27 Zn  3  O Zn   0.000  -1.000   1.000  12.000
+  28 Zn  3 Cu Cu   0.000  -1.000   1.000  12.000
+  29 Zn  3 Cu Zn   0.000  -1.000   1.000  12.000
+  30 Zn  3 Zn Zn   0.000  -1.000   1.000  12.000
+  31 Zn  3  O  O   0.000   1.000   1.000  12.000
+  32 Zn  3  O Cu   0.000   1.000   1.000  12.000
+  33 Zn  3  O Zn   0.000   1.000   1.000  12.000
+  34 Zn  3 Cu Cu   0.000   1.000   1.000  12.000
+  35 Zn  3 Cu Zn   0.000   1.000   1.000  12.000
+  36 Zn  3 Zn Zn   0.000   1.000   1.000  12.000
+  37 Zn  3  O  O   0.000  -1.000   2.000  12.000
+  38 Zn  3  O Cu   0.000  -1.000   2.000  12.000
+  39 Zn  3  O Zn   0.000  -1.000   2.000  12.000
+  40 Zn  3 Cu Cu   0.000  -1.000   2.000  12.000
+  41 Zn  3 Cu Zn   0.000  -1.000   2.000  12.000
+  42 Zn  3 Zn Zn   0.000  -1.000   2.000  12.000
+  43 Zn  3  O  O   0.000   1.000   2.000  12.000
+  44 Zn  3  O Cu   0.000   1.000   2.000  12.000
+  45 Zn  3  O Zn   0.000   1.000   2.000  12.000
+  46 Zn  3 Cu Cu   0.000   1.000   2.000  12.000
+  47 Zn  3 Cu Zn   0.000   1.000   2.000  12.000
+  48 Zn  3 Zn Zn   0.000   1.000   2.000  12.000
+  49 Zn  3  O  O   0.003  -1.000   1.000  12.000
+  50 Zn  3  O Cu   0.003  -1.000   1.000  12.000
+  51 Zn  3  O Zn   0.003  -1.000   1.000  12.000
+  52 Zn  3 Cu Cu   0.003  -1.000   1.000  12.000
+  53 Zn  3 Cu Zn   0.003  -1.000   1.000  12.000
+  54 Zn  3 Zn Zn   0.003  -1.000   1.000  12.000
+  55 Zn  3  O  O   0.003   1.000   1.000  12.000
+  56 Zn  3  O Cu   0.003   1.000   1.000  12.000
+  57 Zn  3  O Zn   0.003   1.000   1.000  12.000
+  58 Zn  3 Cu Cu   0.003   1.000   1.000  12.000
+  59 Zn  3 Cu Zn   0.003   1.000   1.000  12.000
+  60 Zn  3 Zn Zn   0.003   1.000   1.000  12.000
+  61 Zn  3  O  O   0.003  -1.000   2.000  12.000
+  62 Zn  3  O Cu   0.003  -1.000   2.000  12.000
+  63 Zn  3  O Zn   0.003  -1.000   2.000  12.000
+  64 Zn  3 Cu Cu   0.003  -1.000   2.000  12.000
+  65 Zn  3 Cu Zn   0.003  -1.000   2.000  12.000
+  66 Zn  3 Zn Zn   0.003  -1.000   2.000  12.000
+  67 Zn  3  O  O   0.003   1.000   2.000  12.000
+  68 Zn  3  O Cu   0.003   1.000   2.000  12.000
+  69 Zn  3  O Zn   0.003   1.000   2.000  12.000
+  70 Zn  3 Cu Cu   0.003   1.000   2.000  12.000
+  71 Zn  3 Cu Zn   0.003   1.000   2.000  12.000
+  72 Zn  3 Zn Zn   0.003   1.000   2.000  12.000
+  73 Zn  3  O  O   0.008   1.000   1.000  12.000
+  74 Zn  3  O Cu   0.008   1.000   1.000  12.000
+  75 Zn  3  O Zn   0.008   1.000   1.000  12.000
+  76 Zn  3 Cu Cu   0.008   1.000   1.000  12.000
+  77 Zn  3 Cu Zn   0.008   1.000   1.000  12.000
+  78 Zn  3 Zn Zn   0.008   1.000   1.000  12.000
+  79 Zn  3  O  O   0.008   1.000   2.000  12.000
+  80 Zn  3  O Cu   0.008   1.000   2.000  12.000
+  81 Zn  3  O Zn   0.008   1.000   2.000  12.000
+  82 Zn  3 Cu Cu   0.008   1.000   2.000  12.000
+  83 Zn  3 Cu Zn   0.008   1.000   2.000  12.000
+  84 Zn  3 Zn Zn   0.008   1.000   2.000  12.000
+  85 Zn  3  O  O   0.015   1.000   1.000  12.000
+  86 Zn  3  O Cu   0.015   1.000   1.000  12.000
+  87 Zn  3  O Zn   0.015   1.000   1.000  12.000
+  88 Zn  3 Cu Cu   0.015   1.000   1.000  12.000
+  89 Zn  3 Cu Zn   0.015   1.000   1.000  12.000
+  90 Zn  3 Zn Zn   0.015   1.000   1.000  12.000
+  91 Zn  3  O  O   0.015   1.000   2.000  12.000
+  92 Zn  3  O Cu   0.015   1.000   2.000  12.000
+  93 Zn  3  O Zn   0.015   1.000   2.000  12.000
+  94 Zn  3 Cu Cu   0.015   1.000   2.000  12.000
+  95 Zn  3 Cu Zn   0.015   1.000   2.000  12.000
+  96 Zn  3 Zn Zn   0.015   1.000   2.000  12.000
+  97 Zn  3  O  O   0.015   1.000   4.000  12.000
+  98 Zn  3  O Cu   0.015   1.000   4.000  12.000
+  99 Zn  3  O Zn   0.015   1.000   4.000  12.000
+ 100 Zn  3 Cu Cu   0.015   1.000   4.000  12.000
+ 101 Zn  3 Cu Zn   0.015   1.000   4.000  12.000
+ 102 Zn  3 Zn Zn   0.015   1.000   4.000  12.000
+ 103 Zn  3  O  O   0.015   1.000  16.000  12.000
+ 104 Zn  3  O Cu   0.015   1.000  16.000  12.000
+ 105 Zn  3  O Zn   0.015   1.000  16.000  12.000
+ 106 Zn  3 Cu Cu   0.015   1.000  16.000  12.000
+ 107 Zn  3 Cu Zn   0.015   1.000  16.000  12.000
+ 108 Zn  3 Zn Zn   0.015   1.000  16.000  12.000
+ 109 Zn  3  O  O   0.025   1.000   1.000  12.000
+ 110 Zn  3  O Cu   0.025   1.000   1.000  12.000
+ 111 Zn  3  O Zn   0.025   1.000   1.000  12.000
+ 112 Zn  3 Cu Cu   0.025   1.000   1.000  12.000
+ 113 Zn  3 Cu Zn   0.025   1.000   1.000  12.000
+ 114 Zn  3 Zn Zn   0.025   1.000   1.000  12.000
+ 115 Zn  3  O  O   0.025   1.000   2.000  12.000
+ 116 Zn  3  O Cu   0.025   1.000   2.000  12.000
+ 117 Zn  3  O Zn   0.025   1.000   2.000  12.000
+ 118 Zn  3 Cu Cu   0.025   1.000   2.000  12.000
+ 119 Zn  3 Cu Zn   0.025   1.000   2.000  12.000
+ 120 Zn  3 Zn Zn   0.025   1.000   2.000  12.000
+ 121 Zn  3  O  O   0.025   1.000   4.000  12.000
+ 122 Zn  3  O Cu   0.025   1.000   4.000  12.000
+ 123 Zn  3  O Zn   0.025   1.000   4.000  12.000
+ 124 Zn  3 Cu Cu   0.025   1.000   4.000  12.000
+ 125 Zn  3 Cu Zn   0.025   1.000   4.000  12.000
+ 126 Zn  3 Zn Zn   0.025   1.000   4.000  12.000
+ 127 Zn  3  O  O   0.025   1.000  16.000  12.000
+ 128 Zn  3  O Cu   0.025   1.000  16.000  12.000
+ 129 Zn  3  O Zn   0.025   1.000  16.000  12.000
+ 130 Zn  3 Cu Cu   0.025   1.000  16.000  12.000
+ 131 Zn  3 Cu Zn   0.025   1.000  16.000  12.000
+ 132 Zn  3 Zn Zn   0.025   1.000  16.000  12.000
+ 133 Zn  3  O  O   0.045   1.000   1.000  12.000
+ 134 Zn  3  O Cu   0.045   1.000   1.000  12.000
+ 135 Zn  3  O Zn   0.045   1.000   1.000  12.000
+ 136 Zn  3 Cu Cu   0.045   1.000   1.000  12.000
+ 137 Zn  3 Cu Zn   0.045   1.000   1.000  12.000
+ 138 Zn  3 Zn Zn   0.045   1.000   1.000  12.000
+ 139 Zn  3  O  O   0.045   1.000   2.000  12.000
+ 140 Zn  3  O Cu   0.045   1.000   2.000  12.000
+ 141 Zn  3  O Zn   0.045   1.000   2.000  12.000
+ 142 Zn  3 Cu Cu   0.045   1.000   2.000  12.000
+ 143 Zn  3 Cu Zn   0.045   1.000   2.000  12.000
+ 144 Zn  3 Zn Zn   0.045   1.000   2.000  12.000
+ 145 Zn  3  O  O   0.045   1.000   4.000  12.000
+ 146 Zn  3  O Cu   0.045   1.000   4.000  12.000
+ 147 Zn  3  O Zn   0.045   1.000   4.000  12.000
+ 148 Zn  3 Cu Cu   0.045   1.000   4.000  12.000
+ 149 Zn  3 Cu Zn   0.045   1.000   4.000  12.000
+ 150 Zn  3 Zn Zn   0.045   1.000   4.000  12.000
+ 151 Zn  3  O  O   0.045   1.000  16.000  12.000
+ 152 Zn  3  O Cu   0.045   1.000  16.000  12.000
+ 153 Zn  3  O Zn   0.045   1.000  16.000  12.000
+ 154 Zn  3 Cu Cu   0.045   1.000  16.000  12.000
+ 155 Zn  3 Cu Zn   0.045   1.000  16.000  12.000
+ 156 Zn  3 Zn Zn   0.045   1.000  16.000  12.000
+-----------------------------------------------------------------------
+Reading scaling.data...
+Finished reading scaling.data.
+-----------------------------------------------------------------------
+rcmax = 12.000000
+-----------------------------------------------------------------------
+Grouping symmetry functions...
+Printing symmetry function groups...
+-----------------------------------------------------------------------
+short range atomic symmetry functions groups of element  O
+-----------------------------------------------------------------------
+   1  O  2  O                  *       *  12.000    8
+                           0.001   0.000                 1    1
+                           0.010   0.000                 2    4
+                           0.020   0.000                 3    7
+                           0.035   0.000                 4   10
+                           0.060   0.000                 5   13
+                           0.100   0.000                 6   16
+                           0.200   0.000                 7   19
+                           0.400   0.000                 8   22
+   2  O  2 Cu                  *       *  12.000    8
+                           0.001   0.000                 1    2
+                           0.010   0.000                 2    5
+                           0.020   0.000                 3    8
+                           0.035   0.000                 4   11
+                           0.060   0.000                 5   14
+                           0.100   0.000                 6   17
+                           0.200   0.000                 7   20
+                           0.400   0.000                 8   23
+   3  O  2 Zn                  *       *  12.000    8
+                           0.001   0.000                 1    3
+                           0.010   0.000                 2    6
+                           0.020   0.000                 3    9
+                           0.035   0.000                 4   12
+                           0.060   0.000                 5   15
+                           0.100   0.000                 6   18
+                           0.200   0.000                 7   21
+                           0.400   0.000                 8   24
+   4  O  3  O  O       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   25    1
+                   0.000   1.000   1.000                 2   31    1
+                   0.000  -1.000   2.000                 3   37    1
+                   0.000   1.000   2.000                 4   43    1
+                   0.003  -1.000   1.000                 5   49    5
+                   0.003   1.000   1.000                 6   55    5
+                   0.003  -1.000   2.000                 7   61    5
+                   0.003   1.000   2.000                 8   67    5
+                   0.008   1.000   1.000                 9   73    9
+                   0.008   1.000   2.000                10   79    9
+                   0.015   1.000   1.000                11   85   11
+                   0.015   1.000   2.000                12   91   11
+                   0.015   1.000   4.000                13   97   11
+                   0.015   1.000  16.000                14  103   11
+                   0.025   1.000   1.000                15  109   15
+                   0.025   1.000   2.000                16  115   15
+                   0.025   1.000   4.000                17  121   15
+                   0.025   1.000  16.000                18  127   15
+                   0.045   1.000   1.000                19  133   19
+                   0.045   1.000   2.000                20  139   19
+                   0.045   1.000   4.000                21  145   19
+                   0.045   1.000  16.000                22  151   19
+   5  O  3  O Cu       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   26    1
+                   0.000   1.000   1.000                 2   32    1
+                   0.000  -1.000   2.000                 3   38    1
+                   0.000   1.000   2.000                 4   44    1
+                   0.003  -1.000   1.000                 5   50    5
+                   0.003   1.000   1.000                 6   56    5
+                   0.003  -1.000   2.000                 7   62    5
+                   0.003   1.000   2.000                 8   68    5
+                   0.008   1.000   1.000                 9   74    9
+                   0.008   1.000   2.000                10   80    9
+                   0.015   1.000   1.000                11   86   11
+                   0.015   1.000   2.000                12   92   11
+                   0.015   1.000   4.000                13   98   11
+                   0.015   1.000  16.000                14  104   11
+                   0.025   1.000   1.000                15  110   15
+                   0.025   1.000   2.000                16  116   15
+                   0.025   1.000   4.000                17  122   15
+                   0.025   1.000  16.000                18  128   15
+                   0.045   1.000   1.000                19  134   19
+                   0.045   1.000   2.000                20  140   19
+                   0.045   1.000   4.000                21  146   19
+                   0.045   1.000  16.000                22  152   19
+   6  O  3  O Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   27    1
+                   0.000   1.000   1.000                 2   33    1
+                   0.000  -1.000   2.000                 3   39    1
+                   0.000   1.000   2.000                 4   45    1
+                   0.003  -1.000   1.000                 5   51    5
+                   0.003   1.000   1.000                 6   57    5
+                   0.003  -1.000   2.000                 7   63    5
+                   0.003   1.000   2.000                 8   69    5
+                   0.008   1.000   1.000                 9   75    9
+                   0.008   1.000   2.000                10   81    9
+                   0.015   1.000   1.000                11   87   11
+                   0.015   1.000   2.000                12   93   11
+                   0.015   1.000   4.000                13   99   11
+                   0.015   1.000  16.000                14  105   11
+                   0.025   1.000   1.000                15  111   15
+                   0.025   1.000   2.000                16  117   15
+                   0.025   1.000   4.000                17  123   15
+                   0.025   1.000  16.000                18  129   15
+                   0.045   1.000   1.000                19  135   19
+                   0.045   1.000   2.000                20  141   19
+                   0.045   1.000   4.000                21  147   19
+                   0.045   1.000  16.000                22  153   19
+   7  O  3 Cu Cu       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   28    1
+                   0.000   1.000   1.000                 2   34    1
+                   0.000  -1.000   2.000                 3   40    1
+                   0.000   1.000   2.000                 4   46    1
+                   0.003  -1.000   1.000                 5   52    5
+                   0.003   1.000   1.000                 6   58    5
+                   0.003  -1.000   2.000                 7   64    5
+                   0.003   1.000   2.000                 8   70    5
+                   0.008   1.000   1.000                 9   76    9
+                   0.008   1.000   2.000                10   82    9
+                   0.015   1.000   1.000                11   88   11
+                   0.015   1.000   2.000                12   94   11
+                   0.015   1.000   4.000                13  100   11
+                   0.015   1.000  16.000                14  106   11
+                   0.025   1.000   1.000                15  112   15
+                   0.025   1.000   2.000                16  118   15
+                   0.025   1.000   4.000                17  124   15
+                   0.025   1.000  16.000                18  130   15
+                   0.045   1.000   1.000                19  136   19
+                   0.045   1.000   2.000                20  142   19
+                   0.045   1.000   4.000                21  148   19
+                   0.045   1.000  16.000                22  154   19
+   8  O  3 Cu Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   29    1
+                   0.000   1.000   1.000                 2   35    1
+                   0.000  -1.000   2.000                 3   41    1
+                   0.000   1.000   2.000                 4   47    1
+                   0.003  -1.000   1.000                 5   53    5
+                   0.003   1.000   1.000                 6   59    5
+                   0.003  -1.000   2.000                 7   65    5
+                   0.003   1.000   2.000                 8   71    5
+                   0.008   1.000   1.000                 9   77    9
+                   0.008   1.000   2.000                10   83    9
+                   0.015   1.000   1.000                11   89   11
+                   0.015   1.000   2.000                12   95   11
+                   0.015   1.000   4.000                13  101   11
+                   0.015   1.000  16.000                14  107   11
+                   0.025   1.000   1.000                15  113   15
+                   0.025   1.000   2.000                16  119   15
+                   0.025   1.000   4.000                17  125   15
+                   0.025   1.000  16.000                18  131   15
+                   0.045   1.000   1.000                19  137   19
+                   0.045   1.000   2.000                20  143   19
+                   0.045   1.000   4.000                21  149   19
+                   0.045   1.000  16.000                22  155   19
+   9  O  3 Zn Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   30    1
+                   0.000   1.000   1.000                 2   36    1
+                   0.000  -1.000   2.000                 3   42    1
+                   0.000   1.000   2.000                 4   48    1
+                   0.003  -1.000   1.000                 5   54    5
+                   0.003   1.000   1.000                 6   60    5
+                   0.003  -1.000   2.000                 7   66    5
+                   0.003   1.000   2.000                 8   72    5
+                   0.008   1.000   1.000                 9   78    9
+                   0.008   1.000   2.000                10   84    9
+                   0.015   1.000   1.000                11   90   11
+                   0.015   1.000   2.000                12   96   11
+                   0.015   1.000   4.000                13  102   11
+                   0.015   1.000  16.000                14  108   11
+                   0.025   1.000   1.000                15  114   15
+                   0.025   1.000   2.000                16  120   15
+                   0.025   1.000   4.000                17  126   15
+                   0.025   1.000  16.000                18  132   15
+                   0.045   1.000   1.000                19  138   19
+                   0.045   1.000   2.000                20  144   19
+                   0.045   1.000   4.000                21  150   19
+                   0.045   1.000  16.000                22  156   19
+-----------------------------------------------------------------------
+short range atomic symmetry functions groups of element Cu
+-----------------------------------------------------------------------
+   1 Cu  2  O                  *       *  12.000    8
+                           0.001   0.000                 1    1
+                           0.010   0.000                 2    4
+                           0.020   0.000                 3    7
+                           0.035   0.000                 4   10
+                           0.060   0.000                 5   13
+                           0.100   0.000                 6   16
+                           0.200   0.000                 7   19
+                           0.400   0.000                 8   22
+   2 Cu  2 Cu                  *       *  12.000    8
+                           0.001   0.000                 1    2
+                           0.010   0.000                 2    5
+                           0.020   0.000                 3    8
+                           0.035   0.000                 4   11
+                           0.060   0.000                 5   14
+                           0.100   0.000                 6   17
+                           0.200   0.000                 7   20
+                           0.400   0.000                 8   23
+   3 Cu  2 Zn                  *       *  12.000    8
+                           0.001   0.000                 1    3
+                           0.010   0.000                 2    6
+                           0.020   0.000                 3    9
+                           0.035   0.000                 4   12
+                           0.060   0.000                 5   15
+                           0.100   0.000                 6   18
+                           0.200   0.000                 7   21
+                           0.400   0.000                 8   24
+   4 Cu  3  O  O       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   25    1
+                   0.000   1.000   1.000                 2   31    1
+                   0.000  -1.000   2.000                 3   37    1
+                   0.000   1.000   2.000                 4   43    1
+                   0.003  -1.000   1.000                 5   49    5
+                   0.003   1.000   1.000                 6   55    5
+                   0.003  -1.000   2.000                 7   61    5
+                   0.003   1.000   2.000                 8   67    5
+                   0.008   1.000   1.000                 9   73    9
+                   0.008   1.000   2.000                10   79    9
+                   0.015   1.000   1.000                11   85   11
+                   0.015   1.000   2.000                12   91   11
+                   0.015   1.000   4.000                13   97   11
+                   0.015   1.000  16.000                14  103   11
+                   0.025   1.000   1.000                15  109   15
+                   0.025   1.000   2.000                16  115   15
+                   0.025   1.000   4.000                17  121   15
+                   0.025   1.000  16.000                18  127   15
+                   0.045   1.000   1.000                19  133   19
+                   0.045   1.000   2.000                20  139   19
+                   0.045   1.000   4.000                21  145   19
+                   0.045   1.000  16.000                22  151   19
+   5 Cu  3  O Cu       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   26    1
+                   0.000   1.000   1.000                 2   32    1
+                   0.000  -1.000   2.000                 3   38    1
+                   0.000   1.000   2.000                 4   44    1
+                   0.003  -1.000   1.000                 5   50    5
+                   0.003   1.000   1.000                 6   56    5
+                   0.003  -1.000   2.000                 7   62    5
+                   0.003   1.000   2.000                 8   68    5
+                   0.008   1.000   1.000                 9   74    9
+                   0.008   1.000   2.000                10   80    9
+                   0.015   1.000   1.000                11   86   11
+                   0.015   1.000   2.000                12   92   11
+                   0.015   1.000   4.000                13   98   11
+                   0.015   1.000  16.000                14  104   11
+                   0.025   1.000   1.000                15  110   15
+                   0.025   1.000   2.000                16  116   15
+                   0.025   1.000   4.000                17  122   15
+                   0.025   1.000  16.000                18  128   15
+                   0.045   1.000   1.000                19  134   19
+                   0.045   1.000   2.000                20  140   19
+                   0.045   1.000   4.000                21  146   19
+                   0.045   1.000  16.000                22  152   19
+   6 Cu  3  O Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   27    1
+                   0.000   1.000   1.000                 2   33    1
+                   0.000  -1.000   2.000                 3   39    1
+                   0.000   1.000   2.000                 4   45    1
+                   0.003  -1.000   1.000                 5   51    5
+                   0.003   1.000   1.000                 6   57    5
+                   0.003  -1.000   2.000                 7   63    5
+                   0.003   1.000   2.000                 8   69    5
+                   0.008   1.000   1.000                 9   75    9
+                   0.008   1.000   2.000                10   81    9
+                   0.015   1.000   1.000                11   87   11
+                   0.015   1.000   2.000                12   93   11
+                   0.015   1.000   4.000                13   99   11
+                   0.015   1.000  16.000                14  105   11
+                   0.025   1.000   1.000                15  111   15
+                   0.025   1.000   2.000                16  117   15
+                   0.025   1.000   4.000                17  123   15
+                   0.025   1.000  16.000                18  129   15
+                   0.045   1.000   1.000                19  135   19
+                   0.045   1.000   2.000                20  141   19
+                   0.045   1.000   4.000                21  147   19
+                   0.045   1.000  16.000                22  153   19
+   7 Cu  3 Cu Cu       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   28    1
+                   0.000   1.000   1.000                 2   34    1
+                   0.000  -1.000   2.000                 3   40    1
+                   0.000   1.000   2.000                 4   46    1
+                   0.003  -1.000   1.000                 5   52    5
+                   0.003   1.000   1.000                 6   58    5
+                   0.003  -1.000   2.000                 7   64    5
+                   0.003   1.000   2.000                 8   70    5
+                   0.008   1.000   1.000                 9   76    9
+                   0.008   1.000   2.000                10   82    9
+                   0.015   1.000   1.000                11   88   11
+                   0.015   1.000   2.000                12   94   11
+                   0.015   1.000   4.000                13  100   11
+                   0.015   1.000  16.000                14  106   11
+                   0.025   1.000   1.000                15  112   15
+                   0.025   1.000   2.000                16  118   15
+                   0.025   1.000   4.000                17  124   15
+                   0.025   1.000  16.000                18  130   15
+                   0.045   1.000   1.000                19  136   19
+                   0.045   1.000   2.000                20  142   19
+                   0.045   1.000   4.000                21  148   19
+                   0.045   1.000  16.000                22  154   19
+   8 Cu  3 Cu Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   29    1
+                   0.000   1.000   1.000                 2   35    1
+                   0.000  -1.000   2.000                 3   41    1
+                   0.000   1.000   2.000                 4   47    1
+                   0.003  -1.000   1.000                 5   53    5
+                   0.003   1.000   1.000                 6   59    5
+                   0.003  -1.000   2.000                 7   65    5
+                   0.003   1.000   2.000                 8   71    5
+                   0.008   1.000   1.000                 9   77    9
+                   0.008   1.000   2.000                10   83    9
+                   0.015   1.000   1.000                11   89   11
+                   0.015   1.000   2.000                12   95   11
+                   0.015   1.000   4.000                13  101   11
+                   0.015   1.000  16.000                14  107   11
+                   0.025   1.000   1.000                15  113   15
+                   0.025   1.000   2.000                16  119   15
+                   0.025   1.000   4.000                17  125   15
+                   0.025   1.000  16.000                18  131   15
+                   0.045   1.000   1.000                19  137   19
+                   0.045   1.000   2.000                20  143   19
+                   0.045   1.000   4.000                21  149   19
+                   0.045   1.000  16.000                22  155   19
+   9 Cu  3 Zn Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   30    1
+                   0.000   1.000   1.000                 2   36    1
+                   0.000  -1.000   2.000                 3   42    1
+                   0.000   1.000   2.000                 4   48    1
+                   0.003  -1.000   1.000                 5   54    5
+                   0.003   1.000   1.000                 6   60    5
+                   0.003  -1.000   2.000                 7   66    5
+                   0.003   1.000   2.000                 8   72    5
+                   0.008   1.000   1.000                 9   78    9
+                   0.008   1.000   2.000                10   84    9
+                   0.015   1.000   1.000                11   90   11
+                   0.015   1.000   2.000                12   96   11
+                   0.015   1.000   4.000                13  102   11
+                   0.015   1.000  16.000                14  108   11
+                   0.025   1.000   1.000                15  114   15
+                   0.025   1.000   2.000                16  120   15
+                   0.025   1.000   4.000                17  126   15
+                   0.025   1.000  16.000                18  132   15
+                   0.045   1.000   1.000                19  138   19
+                   0.045   1.000   2.000                20  144   19
+                   0.045   1.000   4.000                21  150   19
+                   0.045   1.000  16.000                22  156   19
+-----------------------------------------------------------------------
+short range atomic symmetry functions groups of element Zn
+-----------------------------------------------------------------------
+   1 Zn  2  O                  *       *  12.000    8
+                           0.001   0.000                 1    1
+                           0.010   0.000                 2    4
+                           0.020   0.000                 3    7
+                           0.035   0.000                 4   10
+                           0.060   0.000                 5   13
+                           0.100   0.000                 6   16
+                           0.200   0.000                 7   19
+                           0.400   0.000                 8   22
+   2 Zn  2 Cu                  *       *  12.000    8
+                           0.001   0.000                 1    2
+                           0.010   0.000                 2    5
+                           0.020   0.000                 3    8
+                           0.035   0.000                 4   11
+                           0.060   0.000                 5   14
+                           0.100   0.000                 6   17
+                           0.200   0.000                 7   20
+                           0.400   0.000                 8   23
+   3 Zn  2 Zn                  *       *  12.000    8
+                           0.001   0.000                 1    3
+                           0.010   0.000                 2    6
+                           0.020   0.000                 3    9
+                           0.035   0.000                 4   12
+                           0.060   0.000                 5   15
+                           0.100   0.000                 6   18
+                           0.200   0.000                 7   21
+                           0.400   0.000                 8   24
+   4 Zn  3  O  O       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   25    1
+                   0.000   1.000   1.000                 2   31    1
+                   0.000  -1.000   2.000                 3   37    1
+                   0.000   1.000   2.000                 4   43    1
+                   0.003  -1.000   1.000                 5   49    5
+                   0.003   1.000   1.000                 6   55    5
+                   0.003  -1.000   2.000                 7   61    5
+                   0.003   1.000   2.000                 8   67    5
+                   0.008   1.000   1.000                 9   73    9
+                   0.008   1.000   2.000                10   79    9
+                   0.015   1.000   1.000                11   85   11
+                   0.015   1.000   2.000                12   91   11
+                   0.015   1.000   4.000                13   97   11
+                   0.015   1.000  16.000                14  103   11
+                   0.025   1.000   1.000                15  109   15
+                   0.025   1.000   2.000                16  115   15
+                   0.025   1.000   4.000                17  121   15
+                   0.025   1.000  16.000                18  127   15
+                   0.045   1.000   1.000                19  133   19
+                   0.045   1.000   2.000                20  139   19
+                   0.045   1.000   4.000                21  145   19
+                   0.045   1.000  16.000                22  151   19
+   5 Zn  3  O Cu       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   26    1
+                   0.000   1.000   1.000                 2   32    1
+                   0.000  -1.000   2.000                 3   38    1
+                   0.000   1.000   2.000                 4   44    1
+                   0.003  -1.000   1.000                 5   50    5
+                   0.003   1.000   1.000                 6   56    5
+                   0.003  -1.000   2.000                 7   62    5
+                   0.003   1.000   2.000                 8   68    5
+                   0.008   1.000   1.000                 9   74    9
+                   0.008   1.000   2.000                10   80    9
+                   0.015   1.000   1.000                11   86   11
+                   0.015   1.000   2.000                12   92   11
+                   0.015   1.000   4.000                13   98   11
+                   0.015   1.000  16.000                14  104   11
+                   0.025   1.000   1.000                15  110   15
+                   0.025   1.000   2.000                16  116   15
+                   0.025   1.000   4.000                17  122   15
+                   0.025   1.000  16.000                18  128   15
+                   0.045   1.000   1.000                19  134   19
+                   0.045   1.000   2.000                20  140   19
+                   0.045   1.000   4.000                21  146   19
+                   0.045   1.000  16.000                22  152   19
+   6 Zn  3  O Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   27    1
+                   0.000   1.000   1.000                 2   33    1
+                   0.000  -1.000   2.000                 3   39    1
+                   0.000   1.000   2.000                 4   45    1
+                   0.003  -1.000   1.000                 5   51    5
+                   0.003   1.000   1.000                 6   57    5
+                   0.003  -1.000   2.000                 7   63    5
+                   0.003   1.000   2.000                 8   69    5
+                   0.008   1.000   1.000                 9   75    9
+                   0.008   1.000   2.000                10   81    9
+                   0.015   1.000   1.000                11   87   11
+                   0.015   1.000   2.000                12   93   11
+                   0.015   1.000   4.000                13   99   11
+                   0.015   1.000  16.000                14  105   11
+                   0.025   1.000   1.000                15  111   15
+                   0.025   1.000   2.000                16  117   15
+                   0.025   1.000   4.000                17  123   15
+                   0.025   1.000  16.000                18  129   15
+                   0.045   1.000   1.000                19  135   19
+                   0.045   1.000   2.000                20  141   19
+                   0.045   1.000   4.000                21  147   19
+                   0.045   1.000  16.000                22  153   19
+   7 Zn  3 Cu Cu       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   28    1
+                   0.000   1.000   1.000                 2   34    1
+                   0.000  -1.000   2.000                 3   40    1
+                   0.000   1.000   2.000                 4   46    1
+                   0.003  -1.000   1.000                 5   52    5
+                   0.003   1.000   1.000                 6   58    5
+                   0.003  -1.000   2.000                 7   64    5
+                   0.003   1.000   2.000                 8   70    5
+                   0.008   1.000   1.000                 9   76    9
+                   0.008   1.000   2.000                10   82    9
+                   0.015   1.000   1.000                11   88   11
+                   0.015   1.000   2.000                12   94   11
+                   0.015   1.000   4.000                13  100   11
+                   0.015   1.000  16.000                14  106   11
+                   0.025   1.000   1.000                15  112   15
+                   0.025   1.000   2.000                16  118   15
+                   0.025   1.000   4.000                17  124   15
+                   0.025   1.000  16.000                18  130   15
+                   0.045   1.000   1.000                19  136   19
+                   0.045   1.000   2.000                20  142   19
+                   0.045   1.000   4.000                21  148   19
+                   0.045   1.000  16.000                22  154   19
+   8 Zn  3 Cu Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   29    1
+                   0.000   1.000   1.000                 2   35    1
+                   0.000  -1.000   2.000                 3   41    1
+                   0.000   1.000   2.000                 4   47    1
+                   0.003  -1.000   1.000                 5   53    5
+                   0.003   1.000   1.000                 6   59    5
+                   0.003  -1.000   2.000                 7   65    5
+                   0.003   1.000   2.000                 8   71    5
+                   0.008   1.000   1.000                 9   77    9
+                   0.008   1.000   2.000                10   83    9
+                   0.015   1.000   1.000                11   89   11
+                   0.015   1.000   2.000                12   95   11
+                   0.015   1.000   4.000                13  101   11
+                   0.015   1.000  16.000                14  107   11
+                   0.025   1.000   1.000                15  113   15
+                   0.025   1.000   2.000                16  119   15
+                   0.025   1.000   4.000                17  125   15
+                   0.025   1.000  16.000                18  131   15
+                   0.045   1.000   1.000                19  137   19
+                   0.045   1.000   2.000                20  143   19
+                   0.045   1.000   4.000                21  149   19
+                   0.045   1.000  16.000                22  155   19
+   9 Zn  3 Zn Zn       *       *       *  12.000   22
+                   0.000  -1.000   1.000                 1   30    1
+                   0.000   1.000   1.000                 2   36    1
+                   0.000  -1.000   2.000                 3   42    1
+                   0.000   1.000   2.000                 4   48    1
+                   0.003  -1.000   1.000                 5   54    5
+                   0.003   1.000   1.000                 6   60    5
+                   0.003  -1.000   2.000                 7   66    5
+                   0.003   1.000   2.000                 8   72    5
+                   0.008   1.000   1.000                 9   78    9
+                   0.008   1.000   2.000                10   84    9
+                   0.015   1.000   1.000                11   90   11
+                   0.015   1.000   2.000                12   96   11
+                   0.015   1.000   4.000                13  102   11
+                   0.015   1.000  16.000                14  108   11
+                   0.025   1.000   1.000                15  114   15
+                   0.025   1.000   2.000                16  120   15
+                   0.025   1.000   4.000                17  126   15
+                   0.025   1.000  16.000                18  132   15
+                   0.045   1.000   1.000                19  138   19
+                   0.045   1.000   2.000                20  144   19
+                   0.045   1.000   4.000                21  150   19
+                   0.045   1.000  16.000                22  156   19
+-----------------------------------------------------------------------
+RuNNer pair style setup completed.
+-----------------------------------------------------------------------
+Neighbor list info ...
+  update every 1 steps, delay 10 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 8.01
+  ghost atom cutoff = 8.01
+  binsize = 4.005, bins = 1 1 6
+  1 neighbor lists, perpetual/occasional/extra = 1 0 0
+  (1) pair runner, perpetual
+      attributes: full, newton on
+      pair build: full/bin/atomonly
+      stencil: full/bin/3d
+      bin: standard
+Per MPI rank memory allocation (min/avg/max) = 3.763 | 3.868 | 4.015 Mbytes
+Step Temp E_pair E_mol TotEng Press 
+       0          300   -605940.02            0   -605939.44    165682.88 
+      50    1431.5348   -605951.15            0   -605948.37    12283.968 
+     100     717.8106   -605953.54            0   -605952.15   -28763.979 
+     150    498.20911   -605955.17            0    -605954.2   -46591.844 
+     200    410.59894   -605956.42            0   -605955.62   -49160.225 
+     250    250.27885   -605956.81            0   -605956.33   -34231.746 
+     300    218.15521   -605957.03            0   -605956.61   -22403.216 
+     350    209.25508   -605957.01            0    -605956.6   -9975.1014 
+     400    266.81412   -605956.88            0   -605956.36   -17191.425 
+     450    445.66097   -605956.87            0      -605956   -26430.464 
+     500    304.81773    -605956.6            0   -605956.01   -33864.821 
+     550    257.42698   -605956.57            0   -605956.07    -34727.66 
+     600    208.58102   -605956.47            0   -605956.06   -35296.455 
+     650    326.00076   -605956.61            0   -605955.98   -29589.566 
+     700    390.79169    -605956.7            0   -605955.94   -25668.868 
+     750    384.62376   -605956.88            0   -605956.14   -24973.931 
+     800    213.42253   -605956.84            0   -605956.42   -21470.891 
+     850    269.17832   -605956.95            0   -605956.43   -19375.473 
+     900     311.7479    -605956.9            0   -605956.29   -21435.613 
+     950    350.73915   -605956.71            0   -605956.03   -21273.816 
+    1000    312.30101   -605956.58            0   -605955.98   -26838.516 
+    1050    262.85839   -605956.61            0    -605956.1   -35484.182 
+    1100    243.08483   -605956.63            0   -605956.16   -31251.302 
+    1150    302.51776   -605956.78            0    -605956.2    -26480.66 
+    1200     340.5493   -605956.81            0   -605956.15   -22272.954 
+    1250    376.15964   -605956.78            0   -605956.06   -10880.773 
+    1300    275.20536   -605956.74            0   -605956.21   -15753.506 
+    1350    221.45929   -605956.76            0   -605956.34   -30044.782 
+    1400    265.21416   -605956.82            0   -605956.31   -37052.719 
+    1450    359.72489    -605956.8            0    -605956.1   -31940.973 
+    1500    429.07048   -605956.77            0   -605955.93   -21259.825 
+    1550    266.01188   -605956.62            0    -605956.1   -20366.852 
+    1600    361.52706   -605956.96            0   -605956.26   -26327.478 
+    1650    312.72352   -605956.96            0   -605956.36     -25019.5 
+    1700    332.15732   -605956.97            0   -605956.32   -32466.553 
+    1750    328.63693   -605956.63            0   -605955.99   -21962.386 
+    1800    331.64947   -605956.51            0   -605955.87   -22466.428 
+    1850    396.18681   -605956.72            0   -605955.95   -36937.884 
+    1900    227.69973   -605956.67            0   -605956.23   -32484.406 
+    1950    238.56766   -605956.74            0   -605956.28   -27789.012 
+    2000    347.00968    -605956.9            0   -605956.22   -16088.863 
+    2050    276.02205    -605956.7            0   -605956.16   -13577.464 
+    2100     335.0068   -605956.64            0   -605955.99   -13319.222 
+    2150    342.44117    -605956.7            0   -605956.03   -19187.281 
+    2200    241.53668   -605956.66            0   -605956.19   -33645.066 
+    2250    264.89082   -605956.77            0   -605956.26   -40866.781 
+    2300    188.94976   -605956.65            0   -605956.29   -29693.703 
+    2350    405.59962   -605956.82            0   -605956.03   -29817.196 
+    2400     251.6996   -605956.58            0   -605956.09   -11493.084 
+    2450    343.94953   -605956.89            0   -605956.22   -14027.337 
+    2500    221.95287   -605956.86            0   -605956.43   -15328.994 
+    2550    168.37897   -605956.86            0   -605956.54   -28569.136 
+    2600     340.6066    -605956.9            0   -605956.23   -31379.399 
+    2650    336.81125   -605956.69            0   -605956.04   -31549.645 
+    2700    363.13833   -605956.66            0   -605955.96   -24002.091 
+    2750    449.05175   -605956.93            0   -605956.06   -27216.807 
+    2800    226.96452   -605956.81            0   -605956.37   -15375.445 
+    2850    242.98996   -605956.78            0   -605956.31   -7893.9901 
+    2900    401.05041   -605956.93            0   -605956.15   -21863.051 
+    2950    296.16035    -605956.7            0   -605956.13   -33574.828 
+    3000    229.17814   -605956.64            0   -605956.19   -31243.026 
+    3050    342.57675   -605956.87            0   -605956.21   -35982.637 
+    3100     265.2499   -605956.74            0   -605956.23   -24335.894 
+    3150     349.4827   -605956.81            0   -605956.13   -20703.338 
+    3200    239.74509   -605956.46            0      -605956   -13555.688 
+    3250    509.86584   -605956.78            0   -605955.79   -25637.515 
+    3300    328.15381   -605956.78            0   -605956.14   -21322.997 
+    3350    220.28172   -605956.73            0    -605956.3   -22017.342 
+    3400    301.17165   -605956.81            0   -605956.22   -36277.885 
+    3450    241.76921   -605956.57            0    -605956.1   -28656.224 
+    3500     350.0892    -605956.6            0   -605955.92   -18208.632 
+    3550    342.46855   -605956.73            0   -605956.07   -14366.636 
+    3600    322.58297    -605956.8            0   -605956.17   -16446.741 
+    3650    264.22777   -605956.78            0   -605956.27   -19155.336 
+    3700    267.76702   -605956.72            0    -605956.2   -28765.073 
+    3750    303.98556   -605956.67            0   -605956.08   -24076.023 
+    3800    355.20635   -605956.77            0   -605956.08   -23360.929 
+    3850    280.16443    -605956.7            0   -605956.16   -19343.885 
+    3900    187.18535   -605956.82            0   -605956.45    -27591.17 
+    3950    240.30449   -605956.94            0   -605956.48   -25322.786 
+    4000    277.15121   -605956.85            0   -605956.31   -19248.198 
+    4050    229.53283   -605956.57            0   -605956.13   -18770.371 
+    4100    428.67272   -605956.79            0   -605955.96   -27145.744 
+    4150    346.67649   -605956.77            0    -605956.1    -21438.33 
+    4200    282.70644   -605956.71            0   -605956.16   -39246.798 
+    4250     323.6808   -605956.77            0   -605956.14   -29208.828 
+    4300    321.79659   -605956.78            0   -605956.16   -19936.587 
+    4350    220.59379   -605956.76            0   -605956.33    -22129.05 
+    4400    262.23914   -605956.99            0   -605956.48   -20248.383 
+    4450    226.05902      -605957            0   -605956.56   -16430.288 
+    4500    293.37524   -605956.96            0   -605956.39   -21954.694 
+    4550     256.2265   -605956.64            0   -605956.15   -29911.477 
+    4600    349.48464   -605956.69            0   -605956.02   -34004.148 
+    4650    255.66786   -605956.58            0   -605956.08   -30368.547 
+    4700     274.7997    -605956.8            0   -605956.26   -21763.933 
+    4750     275.4397   -605956.95            0   -605956.42    -18850.88 
+    4800    220.19791   -605956.94            0   -605956.52   -27992.279 
+    4850    186.55653   -605956.87            0   -605956.51   -25692.498 
+    4900    278.76951   -605956.79            0   -605956.24     -26101.4 
+    4950    368.47549   -605956.83            0   -605956.12   -19964.594 
+    5000    242.21801   -605956.59            0   -605956.12   -18953.134 
+    5050     369.0677   -605956.77            0   -605956.06    -33143.28 
+    5100     335.0158   -605956.81            0   -605956.16   -28541.434 
+    5150    259.05618   -605956.86            0   -605956.36    -20347.19 
+    5200    242.14418   -605956.91            0   -605956.44   -21298.436 
+    5250    282.20079   -605956.89            0   -605956.35   -18335.552 
+    5300     325.0423   -605956.65            0   -605956.02   -24866.284 
+    5350    340.29681   -605956.58            0   -605955.92   -20435.732 
+    5400    336.26817   -605956.77            0   -605956.12   -26006.098 
+    5450     216.4417   -605956.68            0   -605956.26   -30150.309 
+    5500    283.09123   -605956.76            0   -605956.21   -27701.963 
+    5550    269.68829   -605956.73            0   -605956.21   -16088.234 
+    5600     304.7233   -605956.83            0   -605956.24   -13969.859 
+    5650    267.13604   -605956.84            0   -605956.33   -19742.219 
+    5700    185.99936   -605956.85            0   -605956.49   -27635.486 
+    5750    221.20289   -605956.83            0    -605956.4   -31039.143 
+    5800    260.56626   -605956.66            0   -605956.16   -28259.673 
+    5850    352.78264   -605956.71            0   -605956.02   -29918.148 
+    5900    332.63254   -605956.72            0   -605956.08   -28647.424 
+    5950    280.77019   -605956.84            0   -605956.29   -22739.881 
+    6000    245.12962   -605956.99            0   -605956.51   -17175.945 
+    6050    227.09252   -605956.93            0   -605956.49   -12759.117 
+    6100    229.64491   -605956.82            0   -605956.38    -23277.14 
+    6150    275.48056   -605956.78            0   -605956.25   -35268.648 
+    6200    213.68083   -605956.54            0   -605956.12   -33348.166 
+    6250    375.42828   -605956.62            0   -605955.89   -33694.615 
+    6300    290.07748   -605956.53            0   -605955.97   -16876.852 
+    6350    326.16219   -605956.79            0   -605956.15    -15641.29 
+    6400    327.96493   -605956.86            0   -605956.23   -16363.591 
+    6450    313.84765   -605956.84            0   -605956.23   -23002.578 
+    6500    252.06158   -605956.76            0   -605956.27   -27149.474 
+    6550    214.25874   -605956.79            0   -605956.38     -33444.3 
+    6600    243.46453   -605956.89            0   -605956.41   -23588.054 
+    6650    331.64969   -605956.84            0    -605956.2    -23979.85 
+    6700    227.70142   -605956.49            0   -605956.05    -13832.46 
+    6750    428.11392   -605956.79            0   -605955.96   -19167.272 
+    6800    362.98074    -605956.9            0    -605956.2   -31323.949 
+    6850    250.77785   -605956.86            0   -605956.38   -34060.053 
+    6900    293.81825   -605956.91            0   -605956.34   -23346.913 
+    6950    240.37133   -605956.68            0   -605956.21   -15752.473 
+    7000    362.35915   -605956.77            0   -605956.07   -18690.276 
+    7050    358.34464    -605956.7            0      -605956   -30072.796 
+    7100    414.89539   -605956.74            0   -605955.93   -26837.236 
+    7150    260.78681   -605956.69            0   -605956.19   -20536.073 
+    7200    193.78436   -605956.75            0   -605956.37   -34661.088 
+    7250    338.88872   -605956.94            0   -605956.29   -21700.372 
+    7300    354.80514   -605956.83            0   -605956.14   -15000.634 
+    7350    383.33834   -605956.64            0   -605955.89   -7980.7197 
+    7400    474.30447    -605956.6            0   -605955.68    -15212.16 
+    7450    332.84054   -605956.68            0   -605956.03   -27240.318 
+    7500    311.49371   -605956.79            0   -605956.18   -41827.215 
+    7550    247.07616   -605956.68            0    -605956.2   -27190.413 
+    7600    358.81175   -605956.81            0   -605956.12   -31318.519 
+    7650    325.19532   -605956.85            0   -605956.22   -8856.8069 
+    7700    276.64576   -605956.93            0   -605956.39   -11682.397 
+    7750    287.12967   -605956.99            0   -605956.44   -26798.542 
+    7800    229.88463   -605956.79            0   -605956.34   -35688.534 
+    7850    332.34144   -605956.69            0   -605956.04   -35424.031 
+    7900    421.39593   -605956.76            0   -605955.94   -34061.142 
+    7950    335.94536   -605956.77            0   -605956.12   -26050.641 
+    8000    283.59239   -605956.87            0   -605956.32   -12352.041 
+    8050    256.81557   -605956.87            0   -605956.37   -15465.213 
+    8100    267.76604   -605956.81            0   -605956.29    -20647.86 
+    8150    412.54297   -605956.82            0   -605956.02   -34560.654 
+    8200    289.69247   -605956.59            0   -605956.03   -28232.066 
+    8250    325.65929   -605956.67            0   -605956.04   -39625.054 
+    8300    258.53523   -605956.62            0   -605956.11   -31801.459 
+    8350    257.75967   -605956.69            0   -605956.19    -20270.24 
+    8400    272.31072   -605956.91            0   -605956.38   -6706.2591 
+    8450    235.52743   -605956.94            0   -605956.49   -21822.516 
+    8500    255.72899   -605956.84            0   -605956.35   -25101.482 
+    8550    300.35886    -605956.6            0   -605956.01   -36141.261 
+    8600    171.99104    -605956.3            0   -605955.97   -34158.388 
+    8650    382.76895   -605956.61            0   -605955.86   -39594.045 
+    8700    252.13742   -605956.61            0   -605956.12    -18852.25 
+    8750    335.83236   -605956.85            0    -605956.2   -20714.786 
+    8800    241.54999   -605956.69            0   -605956.23   -5281.4642 
+    8850    301.19959   -605956.81            0   -605956.23   -18538.388 
+    8900    347.77681    -605956.9            0   -605956.23   -33945.221 
+    8950    239.26869   -605956.67            0   -605956.21   -41441.964 
+    9000    357.37245   -605956.82            0   -605956.13   -34264.693 
+    9050    349.89877   -605956.77            0    -605956.1   -23445.877 
+    9100    299.65638   -605956.72            0   -605956.14   -12318.467 
+    9150    251.87872   -605956.84            0   -605956.35   -14141.834 
+    9200     240.0232   -605956.91            0   -605956.45   -26966.944 
+    9250    205.78016   -605956.81            0   -605956.41    -35415.83 
+    9300    422.20911   -605956.95            0   -605956.13    -31076.89 
+    9350    377.04731   -605956.76            0   -605956.02   -26543.763 
+    9400    324.68143   -605956.69            0   -605956.06   -25225.398 
+    9450    319.79158   -605956.75            0   -605956.13   -22816.728 
+    9500    284.04446   -605956.82            0   -605956.27   -23822.666 
+    9550    250.02641   -605956.87            0   -605956.39   -34525.915 
+    9600    305.95579   -605956.98            0   -605956.39   -18871.605 
+    9650     309.8288   -605956.87            0   -605956.27   -17719.292 
+    9700    401.74233   -605956.79            0   -605956.02   -26553.313 
+    9750    333.15271   -605956.58            0   -605955.94    -40865.24 
+    9800    294.59518   -605956.69            0   -605956.12   -24741.787 
+    9850    192.96287   -605956.75            0   -605956.38   -27916.775 
+    9900    284.06444   -605956.88            0   -605956.33   -21889.451 
+    9950    530.61428   -605957.21            0   -605956.18   -19443.799 
+   10000    344.79855   -605957.15            0   -605956.48   -15072.444 
+Loop time of 26.6695 on 12 procs for 10000 steps with 16 atoms
+
+Performance: 64.793 ns/day, 0.370 hours/ns, 374.960 timesteps/s
+99.9% CPU use with 12 MPI tasks x no OpenMP threads
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 0.0066499  | 6.5843     | 23.184     | 305.3 | 24.69
+Neigh   | 0.00030974 | 0.00081346 | 0.0016399  |   0.0 |  0.00
+Comm    | 0.74515    | 10.801     | 20.686     | 213.6 | 40.50
+Output  | 0.017127   | 0.017565   | 0.017656   |   0.1 |  0.07
+Modify  | 0.032232   | 9.2437     | 25.88      | 342.4 | 34.66
+Other   |            | 0.0219     |            |       |  0.08
+
+Nlocal:    1.33333 ave 3 max 0 min
+Histogram: 6 0 0 0 0 0 2 0 0 4
+Nghost:    298.667 ave 358 max 225 min
+Histogram: 4 0 0 2 0 0 0 0 0 6
+Neighs:    0 ave 0 max 0 min
+Histogram: 12 0 0 0 0 0 0 0 0 0
+FullNghs:  172.833 ave 383 max 0 min
+Histogram: 6 0 0 0 0 0 0 0 3 3
+
+Total # of neighbors = 2074
+Ave neighs/atom = 129.625
+Neighbor list builds = 105
+Dangerous builds = 0
+write_restart ${nameRestartEnd}                                                         # write final configuration (binary)
+write_restart traj/endcfg.res                                                         
+###############################################################################
+# CLEAN UP
+###############################################################################
+undump XYZ
+unfix AVE_TD
+unfix INT
+###############################################################################
+Total wall time: 0:00:26
