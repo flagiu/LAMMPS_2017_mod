@@ -16,7 +16,6 @@
 
 #include "pointers.h"
 #include <map>
-//#include <vector>
 
 namespace LAMMPS_NS {
 
@@ -124,7 +123,6 @@ class Neighbor : protected Pointers {
   void exclusion_group_group_delete(int, int);  // rm a group-group exclusion
   int exclude_setting();            // return exclude value to accelerator pkg
   class NeighRequest *find_request(void *);  // find a neighbor request
-//  const std::vector<NeighRequest *> get_pair_requests() const;
 
   bigint memory_usage();
 
