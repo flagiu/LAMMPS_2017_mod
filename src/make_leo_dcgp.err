@@ -1,0 +1,93 @@
+make[1]: warning: -j12 forced in submake: resetting jobserver mode.
+make[1]: warning: -j12 forced in submake: resetting jobserver mode.
+../variable.cpp:2650:48: warning: implicit conversion from 'long' to 'double' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+      if (tree->value > ivalue2) tree->value = MAXBIGINT;
+                                             ~ ^~~~~~~~~
+../lmptype.h:89:19: note: expanded from macro 'MAXBIGINT'
+#define MAXBIGINT INT64_MAX
+                  ^~~~~~~~~
+/usr/include/stdint.h:124:22: note: expanded from macro 'INT64_MAX'
+# define INT64_MAX              (__INT64_C(9223372036854775807))
+                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/stdint.h:106:24: note: expanded from macro '__INT64_C'
+#  define __INT64_C(c)  c ## L
+                        ^~~~~~
+<scratch space>:7:1: note: expanded from here
+9223372036854775807L
+^~~~~~~~~~~~~~~~~~~~
+../variable.cpp:2651:26: warning: implicit conversion from 'long' to 'double' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+    } else tree->value = MAXBIGINT;
+                       ~ ^~~~~~~~~
+../lmptype.h:89:19: note: expanded from macro 'MAXBIGINT'
+#define MAXBIGINT INT64_MAX
+                  ^~~~~~~~~
+/usr/include/stdint.h:124:22: note: expanded from macro 'INT64_MAX'
+# define INT64_MAX              (__INT64_C(9223372036854775807))
+                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/stdint.h:106:24: note: expanded from macro '__INT64_C'
+#  define __INT64_C(c)  c ## L
+                        ^~~~~~
+<scratch space>:8:1: note: expanded from here
+9223372036854775807L
+^~~~~~~~~~~~~~~~~~~~
+../variable.cpp:2984:32: warning: implicit conversion from 'long' to 'double' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+      if (arg > ivalue2) arg = MAXBIGINT;
+                             ~ ^~~~~~~~~
+../lmptype.h:89:19: note: expanded from macro 'MAXBIGINT'
+#define MAXBIGINT INT64_MAX
+                  ^~~~~~~~~
+/usr/include/stdint.h:124:22: note: expanded from macro 'INT64_MAX'
+# define INT64_MAX              (__INT64_C(9223372036854775807))
+                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/stdint.h:106:24: note: expanded from macro '__INT64_C'
+#  define __INT64_C(c)  c ## L
+                        ^~~~~~
+<scratch space>:51:1: note: expanded from here
+9223372036854775807L
+^~~~~~~~~~~~~~~~~~~~
+../variable.cpp:2985:18: warning: implicit conversion from 'long' to 'double' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+    } else arg = MAXBIGINT;
+               ~ ^~~~~~~~~
+../lmptype.h:89:19: note: expanded from macro 'MAXBIGINT'
+#define MAXBIGINT INT64_MAX
+                  ^~~~~~~~~
+/usr/include/stdint.h:124:22: note: expanded from macro 'INT64_MAX'
+# define INT64_MAX              (__INT64_C(9223372036854775807))
+                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/stdint.h:106:24: note: expanded from macro '__INT64_C'
+#  define __INT64_C(c)  c ## L
+                        ^~~~~~
+<scratch space>:52:1: note: expanded from here
+9223372036854775807L
+^~~~~~~~~~~~~~~~~~~~
+../variable.cpp:3526:38: warning: implicit conversion from 'long' to 'double' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+        if (value > ivalue2) value = MAXBIGINT;
+                                   ~ ^~~~~~~~~
+../lmptype.h:89:19: note: expanded from macro 'MAXBIGINT'
+#define MAXBIGINT INT64_MAX
+                  ^~~~~~~~~
+/usr/include/stdint.h:124:22: note: expanded from macro 'INT64_MAX'
+# define INT64_MAX              (__INT64_C(9223372036854775807))
+                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/stdint.h:106:24: note: expanded from macro '__INT64_C'
+#  define __INT64_C(c)  c ## L
+                        ^~~~~~
+<scratch space>:151:1: note: expanded from here
+9223372036854775807L
+^~~~~~~~~~~~~~~~~~~~
+../variable.cpp:3527:22: warning: implicit conversion from 'long' to 'double' changes value from 9223372036854775807 to 9223372036854775808 [-Wimplicit-const-int-float-conversion]
+      } else value = MAXBIGINT;
+                   ~ ^~~~~~~~~
+../lmptype.h:89:19: note: expanded from macro 'MAXBIGINT'
+#define MAXBIGINT INT64_MAX
+                  ^~~~~~~~~
+/usr/include/stdint.h:124:22: note: expanded from macro 'INT64_MAX'
+# define INT64_MAX              (__INT64_C(9223372036854775807))
+                                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/usr/include/stdint.h:106:24: note: expanded from macro '__INT64_C'
+#  define __INT64_C(c)  c ## L
+                        ^~~~~~
+<scratch space>:152:1: note: expanded from here
+9223372036854775807L
+^~~~~~~~~~~~~~~~~~~~
+6 warnings generated.

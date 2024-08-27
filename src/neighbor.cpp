@@ -1641,19 +1641,6 @@ NeighRequest *Neighbor::find_request(void *classptr)
 }
 
 /* ----------------------------------------------------------------------
-   return vector with neighbor list requests from pair styles
-------------------------------------------------------------------------- */
-/*
-const std::vector<NeighRequest *> Neighbor::get_pair_requests() const
-{
-  std::vector<NeighRequest *> matches;
-  for (int i=0; i < nrequest; ++i)
-    if (requests[i]->pair) matches.push_back(requests[i]);
-  return matches;
-}
-*/
-
-/* ----------------------------------------------------------------------
    assign NBin class to a NeighList
    use neigh request settings to build mask
    match mask to list of masks of known Nbin classes
