@@ -1,0 +1,220 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix wall/gran/region command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID wall/gran/region fstyle Kn Kt gamma_n gamma_t xmu dampflag wallstyle regionID 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>wall/region = style name of this fix command 
+
+<LI>fstyle = style of force interactions between particles and wall 
+
+<PRE>  possible choices: hooke, hooke/history, hertz/history 
+</PRE>
+<LI>Kn = elastic constant for normal particle repulsion (force/distance units or pressure units - see discussion below) 
+
+<LI>Kt = elastic constant for tangential contact (force/distance units or pressure units - see discussion below) 
+
+<LI>gamma_n = damping coefficient for collisions in normal direction (1/time units or 1/time-distance units - see discussion below) 
+
+<LI>gamma_t = damping coefficient for collisions in tangential direction (1/time units or 1/time-distance units - see discussion below) 
+
+<LI>xmu = static yield criterion (unitless value between 0.0 and 1.0e4) 
+
+<LI>dampflag = 0 or 1 if tangential damping force is excluded or included 
+
+<LI>wallstyle = region (see <A HREF = "fix_wall_gran.html">fix wall/gran</A> for options for other kinds of walls) 
+
+<LI>region-ID = region whose boundary will act as wall 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix wall all wall/gran/region hooke/history 1000.0 200.0 200.0 100.0 0.5 1 region myCone 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Treat the surface of the geometric region defined by the <I>region-ID</I>
+as a bounding frictional wall which interacts with nearby finite-size
+granular particles when they are close enough to touch the wall.  See
+the <A HREF = "fix_wall_region.html">fix wall/region</A> and <A HREF = "fix_wall_gran.html">fix
+wall/gran</A> commands for related kinds of walls for
+non-granular particles and simpler wall geometries, respectively.
+</P>
+<P>Here are snapshots of example models using this command.
+Corresponding input scripts can be found in examples/granregion.
+Click on the images to see a bigger picture.  Movies of these
+simulations are <A HREF = "http://lammps.sandia.gov/movies.html#granregion">here on the Movies
+page</A> of the
+LAMMPS web site.
+</P>
+<A HREF = "JPG/gran_funnel.png"><IMG SRC = "JPG/gran_funnel_small.jpg"></A>
+
+<A HREF = "JPG/gran_mixer.png"><IMG SRC = "JPG/gran_mixer_small.jpg"></A>
+
+<HR>
+
+<P>The distance between a particle and the region boundary is the
+distance to the nearest point on the region surface.  The force the
+wall exerts on the particle is along the direction between that point
+and the particle center, which is the direction normal to the surface
+at that point.  Note that if the region surface is comprised of
+multiple "faces", then each face can exert a force on the particle if
+it is close enough.  E.g. for <A HREF = "region.html">region_style block</A>, a
+particle in the interior, near a corner of the block, could feel wall
+forces from 1, 2, or 3 faces of the block.
+</P>
+<P>Regions are defined using the <A HREF = "region.html">region</A> command.  Note that
+the region volume can be interior or exterior to the bounding surface,
+which will determine in which direction the surface interacts with
+particles, i.e. the direction of the surface normal. The exception to
+this is if one or more <I>open</I> options are specified for the region
+command, in which case particles interact with both the interior and
+exterior surfaces of regions.
+</P>
+<P>Regions can either be primitive shapes (block, sphere, cylinder, etc)
+or combinations of primitive shapes specified via the <I>union</I> or
+<I>intersect</I> region styles.  These latter styles can be used to
+construct particle containers with complex shapes.  Regions can also
+move dynamically via the <A HREF = "region.html">region</A> command keywords (move)
+and <I>rotate</I>, or change their shape by use of variables as inputs to
+the <A HREF = "region.html">region</A> command.  If such a region is used with this
+fix, then the region surface will move in time in the corresponding
+manner.
+</P>
+<P>NOTE: As discussed on the <A HREF = "region.html">region</A> command doc page,
+regions in LAMMPS do not get wrapped across periodic boundaries.  It
+is up to you to ensure that the region location with respect to
+periodic or non-periodic boundaries is specified appropriately via the
+<A HREF = "region.html">region</A> and <A HREF = "boundary.html">boundary</A> commands when using
+a region as a wall that bounds particle motion.
+</P>
+<P>NOTE: For primitive regions with sharp corners and/or edges (e.g. a
+block or cylinder), wall/particle forces are computed accurately for
+both interior and exterior regions.  For <I>union</I> and <I>intersect</I>
+regions, additional sharp corners and edges may be present due to the
+intersection of the surfaces of 2 or more primitive volumes.  These
+corners and edges can be of two types: concave or convex.  Concave
+points/edges are like the corners of a cube as seen by particles in
+the interior of a cube.  Wall/particle forces around these features
+are computed correctly.  Convex points/edges are like the corners of a
+cube as seen by particles exterior to the cube, i.e. the points jut
+into the volume where particles are present.  LAMMPS does NOT compute
+the location of these convex points directly, and hence wall/particle
+forces in the cutoff volume around these points suffer from
+inaccuracies.  The basic problem is that the outward normal of the
+surface is not continuous at these points.  This can cause particles
+to feel no force (they don't "see" the wall) when in one location,
+then move a distance epsilon, and suddenly feel a large force because
+they now "see" the wall.  In a worst-case scenario, this can blow
+particles out of the simulation box.  Thus, as a general rule you
+should not use the fix wall/gran/region command with <I>union</I> or
+<I>interesect</I> regions that have convex points or edges resulting from
+the union/intersection (convex points/edges in the union/intersection
+due to a single sub-region are still OK).
+</P>
+<P>NOTE: Similarly, you should not define <I>union</I> or <I>intersert</I> regions
+for use with this command that share an overlapping common face that
+is part of the overall outer boundary (interior boundary is OK), even
+if the face is smooth.  E.g. two regions of style block in a <I>union</I>
+region, where the two blocks overlap on one or more of their faces.
+This is because LAMMPS discards points that are part of multiple
+sub-regions when calculating wall/particle interactions, to avoid
+double-counting the interaction.  Having two coincident faces could
+cause the face to become invisible to the particles.  The solution is
+to make the two faces differ by epsilon in their position.
+</P>
+<P>The nature of the wall/particle interactions are determined by the
+<I>fstyle</I> setting.  It can be any of the styles defined by the
+<A HREF = "pair_gran.html">pair_style granular</A> commands.  Currently this is
+<I>hooke</I>, <I>hooke/history</I>, or <I>hertz/history</I>.  The equation for the
+force between the wall and particles touching it is the same as the
+corresponding equation on the <A HREF = "pair_gran.html">pair_style granular</A> doc
+page, but the effective radius is calculated using the radius of the
+particle and the radius of curvature of the wall at the contact point.
+</P>
+<P>Specifically, delta = radius - r = overlap of particle with wall,
+m_eff = mass of particle, and RiRj/Ri+Rj is the effective radius, with
+Rj replaced by the radius of curvature of the wall at the contact
+point.  The radius of curvature can be negative for a concave wall
+section, e.g. the interior of cylinder.  For a flat wall, delta =
+radius - r = overlap of particle with wall, m_eff = mass of particle,
+and the effective radius of contact is just the radius of the
+particle.
+</P>
+<P>The parameters <I>Kn</I>, <I>Kt</I>, <I>gamma_n</I>, <I>gamma_t</I>, <I>xmu</I> and <I>dampflag</I>
+have the same meaning and units as those specified with the
+<A HREF = "pair_gran.html">pair_style granular</A> commands.  This means a NULL can
+be used for either <I>Kt</I> or <I>gamma_t</I> as described on that page.  If a
+NULL is used for <I>Kt</I>, then a default value is used where <I>Kt</I> = 2/7
+<I>Kn</I>.  If a NULL is used for <I>gamma_t</I>, then a default value is used
+where <I>gamma_t</I> = 1/2 <I>gamma_n</I>.
+</P>
+<P>Note that you can choose a different force styles and/or different
+values for the 6 wall/particle coefficients than for particle/particle
+interactions.  E.g. if you wish to model the wall as a different
+material.
+</P>
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>Similar to <A HREF = "fix_wall_gran.html">fix wall/gran</A> command, this fix
+writes the shear friction state of atoms interacting with the wall to
+<A HREF = "restart.html">binary restart files</A>, so that a simulation can continue
+correctly if granular potentials with shear "history" effects are
+being used.  This fix also includes info about a moving region in the
+restart file.  See the <A HREF = "read_restart.html">read_restart</A> command for
+info on how to re-specify a fix in an input script that reads a
+restart file, so that the operation of the fix continues in an
+uninterrupted fashion.
+</P>
+<P>NOTE: Information about region definitions is NOT included in restart
+files, as discussed on the <A HREF = "read_restart.html">read_restart</A> doc page.
+So you must re-define your region and if it is a moving region, define
+its motion attributes in a way that is consistent with the simulation
+that wrote the restart file.  In particular, if you want to change the
+region motion attributes (e.g. its velocity), then you should ensure
+the position/orientation of the region at the initial restart
+timestep is the same as it was on the timestep the restart file was
+written.  If this is not possible, you may need to ignore info in the
+restart file by defining a new fix wall/gran/region command in your
+restart script, e.g. with a different fix ID.  Or if you want to keep
+the shear history info but discard the region motion information, you
+can use the same fix ID for fix wall/gran/region, but assign it a
+region with a different region ID.
+</P>
+<P>None of the <A HREF = "fix_modify.html">fix_modify</A> options are relevant to this
+fix.  No global or per-atom quantities are stored by this fix for
+access by various <A HREF = "Section_howto.html#howto_15">output commands</A>.  No
+parameter of this fix can be used with the <I>start/stop</I> keywords of
+the <A HREF = "run.html">run</A> command.  This fix is not invoked during <A HREF = "minimize.html">energy
+minimization</A>.
+</P>
+<P><B>Restrictions:</B>
+</P>
+<P>This fix is part of the GRANULAR package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_move.html">fix_move</A>,
+<A HREF = "fix_wall_gran.html">fix wall/gran</A>,
+<A HREF = "fix_wall_region.html">fix wall/region</A>,
+<A HREF = "pair_gran.html">pair_style granular</A>,
+<A HREF = "region.html">region</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

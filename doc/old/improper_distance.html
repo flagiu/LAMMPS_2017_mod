@@ -1,0 +1,64 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>improper_style distance command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<P>improper_style distance
+</P>
+<P><B>Examples:</B>
+</P>
+<PRE>improper_style distance
+improper_coeff 1 80.0 100.0 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>The <I>distance</I> improper style uses the potential
+</P>
+<CENTER><IMG SRC = "Eqs/improper_dist-1.jpg">
+</CENTER>
+<P>where d is the distance between the central atom and the plane formed
+by the other three atoms.  If the 4 atoms in an improper quadruplet
+(listed in the data file read by the <A HREF = "read_data.html">read_data</A>
+command) are ordered I,J,K,L then the I-atom is assumed to be the
+central atom.
+</P>
+<CENTER><IMG SRC = "JPG/improper_distance.jpg">
+</CENTER>
+<P>Note that defining 4 atoms to interact in this way, does not mean that
+bonds necessarily exist between I-J, J-K, or K-L, as they would in a
+linear dihedral. Normally, the bonds I-J, I-K, I-L would exist for an
+improper to be defined between the 4 atoms.
+</P>
+<P>The following coefficients must be defined for each improper type via
+the improper_coeff command as in the example above, or in the data
+file or restart files read by the read_data or read_restart commands:
+</P>
+<UL><LI>K_2 (energy/distance^2)
+<LI>K_4 (energy/distance^4) 
+</UL>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This improper style can only be used if LAMMPS was built with the
+USER-MISC package.  See the <A HREF = "Section_start.html#start_3">Making LAMMPS</A>
+section for more info on packages.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "improper_coeff.html">improper_coeff</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,118 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>compute cnp/atom command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>compute ID group-ID cnp/atom cutoff 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "compute.html">compute</A> command
+<LI>cnp/atom = style name of this compute command
+<LI>cutoff = cutoff distance for nearest neighbors (distance units) 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>compute 1 all cnp/atom 3.08 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Define a computation that calculates the Common Neighborhood
+Parameter (CNP) for each atom in the group.  In solid-state systems
+the CNP is a useful measure of the local crystal structure
+around an atom and can be used to characterize whether the
+atom is part of a perfect lattice, a local defect (e.g. a dislocation
+or stacking fault), or at a surface.
+</P>
+<P>The value of the CNP parameter will be 0.0 for atoms not in the
+specified compute group.  Note that normally a CNP calculation should
+only be performed on single component systems.
+</P>
+<P>This parameter is computed using the following formula from
+<A HREF = "#Tsuzuki2">(Tsuzuki)</A>
+</P>
+<CENTER><IMG SRC = "Eqs/cnp_eq.jpg">
+</CENTER>
+<P>where the index <I>j</I> goes over the <I>n</I>i nearest neighbors of atom
+<I>i</I>, and the index <I>k</I> goes over the <I>n</I>ij common nearest neighbors
+between atom <I>i</I> and atom <I>j</I>. Rik and Rjk are the vectors connecting atom
+<I>k</I> to atoms <I>i</I> and <I>j</I>.  The quantity in the double sum is computed
+for each atom.
+</P>
+<P>The CNP calculation is sensitive to the specified cutoff value.
+You should ensure that the appropriate nearest neighbors of an atom are
+found within the cutoff distance for the presumed crystal structure.
+E.g. 12 nearest neighbor for perfect FCC and HCP crystals, 14 nearest
+neighbors for perfect BCC crystals.  These formulas can be used to
+obtain a good cutoff distance:
+</P>
+<CENTER><IMG SRC = "Eqs/cnp_cutoff.jpg">
+</CENTER>
+<P>where a is the lattice constant for the crystal structure concerned
+and in the HCP case, x = (c/a) / 1.633, where 1.633 is the ideal c/a
+for HCP crystals.
+</P>
+<P>Also note that since the CNP calculation in LAMMPS uses the neighbors
+of an owned atom to find the nearest neighbors of a ghost atom, the
+following relation should also be satisfied:
+</P>
+<CENTER><IMG SRC = "Eqs/cnp_cutoff2.jpg">
+</CENTER>
+<P>where Rc is the cutoff distance of the potential, Rs is the skin
+distance as specified by the <A HREF = "neighbor.html">neighbor</A> command, and
+cutoff is the argument used with the compute cnp/atom command.  LAMMPS
+will issue a warning if this is not the case.
+</P>
+<P>The neighbor list needed to compute this quantity is constructed each
+time the calculation is performed (e.g. each time a snapshot of atoms
+is dumped).  Thus it can be inefficient to compute/dump this quantity
+too frequently or to have multiple compute/dump commands, each with a
+<I>cnp/atom</I> style.
+</P>
+<P><B>Output info:</B>
+</P>
+<P>This compute calculates a per-atom vector, which can be accessed by
+any command that uses per-atom values from a compute as input.  See
+<A HREF = "Section_howto.html#howto_15">Section 6.15</A> for an overview of
+LAMMPS output options.
+</P>
+<P>The per-atom vector values will be real positive numbers. Some typical CNP
+values:
+</P>
+<PRE>FCC lattice = 0.0
+BCC lattice = 0.0
+HCP lattice = 4.4 
+</PRE>
+<PRE>FCC (111) surface ~ 13.0
+FCC (100) surface ~ 26.5
+FCC dislocation core ~ 11 
+</PRE>
+<P><B>Restrictions:</B>
+</P>
+<P>This compute is part of the USER-MISC package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "compute_cna_atom.html">compute cna/atom</A>
+<A HREF = "compute_centro_atom.html">compute centro/atom</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Tsuzuki2"></A>
+
+<P><B>(Tsuzuki)</B> Tsuzuki, Branicio, Rino, Comput Phys Comm, 177, 518 (2007).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

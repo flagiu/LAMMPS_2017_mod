@@ -1,0 +1,68 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix manifoldforce command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID manifoldforce manifold manifold-args ... 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>manifold = name of the manifold 
+
+<LI>manifold-args = parameters for the manifold 
+
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<P>fix constrain all manifoldforce sphere 5.0
+</P>
+<P><B>Description:</B>
+</P>
+<P>This fix subtracts each time step from the force the component along the normal of the specified <A HREF = "manifolds.html">manifold</A>.
+This can be used in combination with <A HREF = "minimize.html">minimize</A> to remove overlap between particles while
+keeping them (roughly) constrained to the given manifold, e.g. to set up a run with <A HREF = "fix_nve_manifold_rattle.html">fix nve/manifold/rattle</A>.
+I have found that only <I>hftn</I> and <I>quickmin</I> with a very small time step perform adequately though.
+</P>
+<HR>
+
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>No information about this fix is written to <A HREF = "restart.html">binary restart
+files</A>.  None of the <A HREF = "fix_modify.html">fix_modify</A> options
+are relevant to this fix.  No global or per-atom quantities are stored
+by this fix for access by various <A HREF = "Section_howto.html#howto_15">output
+commands</A>.  No parameter of this fix can
+be used with the <I>start/stop</I> keywords of the <A HREF = "run.html">run</A> command.
+This fix is invoked during <A HREF = "minimize.html">energy minimization</A>.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This fix is part of the USER-MANIFOLD package. It is only enabled if LAMMPS
+was built with that package. See the <A HREF = "Section_start.html#start_3">Making LAMMPS</A>
+section for more info.
+</P>
+<P>Only use this with <I>min_style hftn</I> or <I>min_style quickmin</I>. If not, the constraints
+will not be satisfied very well at all. A warning is generated if the <I>min_style</I> is
+incompatible but no error.
+</P>
+<HR>
+
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_nve_manifold_rattle.html">fix nve/manifold/rattle</A>, <A HREF = "fix_nvt_manifold_rattle.html">fix nvt/manifold/rattle</A>
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,168 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>pair_style exp6/rx command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>pair_style exp6/rx cutoff ... 
+</PRE>
+<UL><LI>cutoff = global cutoff for DPD interactions (distance units)
+<LI>weighting = fractional or molecular (optional) 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>pair_style exp6/rx 10.0
+pair_style exp6/rx 10.0 fractional
+pair_style exp6/rx 10.0 molecular
+pair_coeff * * exp6.params h2o h2o exponent 1.0 1.0 10.0
+pair_coeff * * exp6.params h2o 1fluid exponent 1.0 1.0 10.0
+pair_coeff * * exp6.params 1fluid 1fluid exponent 1.0 1.0 10.0
+pair_coeff * * exp6.params 1fluid 1fluid none 10.0
+pair_coeff * * exp6.params 1fluid 1fluid polynomial filename 10.0 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Style <I>exp6/rx</I> is used in reaction DPD simulations, where the
+coarse-grained (CG) particles are composed of <I>m</I> species whose
+reaction rate kinetics are determined from a set of <I>n</I> reaction rate
+equations through the <A HREF = "fix_rx.html">fix rx</A> command.  The species of
+one CG particle can interact with a species in a neighboring CG
+particle through a site-site interaction potential model.  The
+<I>exp6/rx</I> style computes an exponential-6 potential given by
+</P>
+<CENTER><IMG SRC = "Eqs/pair_exp6_rx.jpg">
+</CENTER>
+<P>where the <I>epsilon</I> parameter determines the depth of the potential
+minimum located at <I>Rm</I>, and <I>alpha</I> determines the softness of the repulsion.
+</P>
+<P>The coefficients must be defined for each species in a given particle
+type via the <A HREF = "pair_coeff.html">pair_coeff</A> command as in the examples
+above, where the first argument is the filename that includes the
+exponential-6 parameters for each species.  The file includes the
+species tag followed by the <I>alpha</I>, <I>epsilon</I> and <I>Rm</I>
+parameters. The format of the file is described below.
+</P>
+<P>The second and third arguments specify the site-site interaction
+potential between two species contained within two different
+particles.  The species tags must either correspond to the species
+defined in the reaction kinetics files specified with the <A HREF = "fix_rx.html">fix
+rx</A> command or they must correspond to the tag "1fluid",
+signifying interaction with a product species mixture determined
+through a one-fluid approximation.  The interaction potential is
+weighted by the geometric average of either the mole fraction concentrations
+or the number of molecules associated with the interacting coarse-grained
+particles (see the <I>fractional</I> or <I>molecular</I> weighting pair style options).
+The coarse-grained potential is stored before and after the
+reaction kinetics solver is applied, where the difference is defined
+to be the internal chemical energy (uChem).
+</P>
+<P>The fourth argument specifies the type of scaling that will be used
+to scale the EXP-6 parameters as reactions occur.  Currently, there
+are three scaling options:  <I>exponent</I>, <I>polynomial</I> and <I>none</I>.
+</P>
+<P>Exponent scaling requires two additional arguments for scaling
+the <I>Rm</I> and <I>epsilon</I> parameters, respectively.  The scaling factor
+is computed by phi^exponent, where phi is the number of molecules
+represented by the coarse-grain particle and exponent is specified
+as a pair coefficient argument for <I>Rm</I> and <I>epsilon</I>, respectively.
+The <I>Rm</I> and <I>epsilon</I> parameters are multiplied by the scaling
+factor to give the scaled interaction parameters for the CG particle.
+</P>
+<P>Polynomial scaling requires a filename to be specified as a pair
+coeff argument.  The file contains the coefficients to a fifth order
+polynomial for the <I>alpha</I>, <I>epsilon</I> and <I>Rm</I> parameters that depend
+upon phi (the number of molecules represented by the CG particle).
+The format of a polynomial file is provided below.
+</P>
+<P>The <I>none</I> option to the scaling does not have any additional pair coeff
+arguments.  This is equivalent to specifying the <I>exponent</I> option with
+<I>Rm</I> and <I>epsilon</I> exponents of 0.0 and 0.0, respectively.
+</P>
+<P>The final argument specifies the interaction cutoff (optional).
+</P>
+<HR>
+
+<P>The format of a tabulated file is as follows (without the
+parenthesized comments):
+</P>
+<PRE># exponential-6 parameters for various species      (one or more comment or blank lines) 
+</PRE>
+<PRE>h2o  exp6  11.00 0.02 3.50                          (species, exp6, alpha, Rm, epsilon)
+no2  exp6  13.60 0.01 3.70
+...
+co2  exp6  13.00 0.03 3.20 
+</PRE>
+<P>The format of the polynomial scaling file as follows (without the
+parenthesized comments):
+</P>
+<PRE># POLYNOMIAL FILE          (one or more comment or blank lines) 
+</PRE>
+<PRE>#  General Functional Form:
+#  A*phi^5 + B*phi^4 + C*phi^3 + D*phi^2 + E*phi + F
+#
+#  Parameter  A        B         C        D         E        F
+                           (blank)
+alpha        0.0000   0.00000   0.00008  0.04955  -0.73804  13.63201
+epsilon      0.0000   0.00478  -0.06283  0.24486  -0.33737   2.60097
+rm           0.0001  -0.00118  -0.00253  0.05812  -0.00509   1.50106 
+</PRE>
+<P>A section begins with a non-blank line whose 1st character is not a
+"#"; blank lines or lines starting with "#" can be used as comments
+between sections.
+</P>
+<P>Following a blank line, the next N lines list the species and their
+corresponding parameters.  The first argument is the species tag, the
+second argument is the exp6 tag, the 3rd argument is the <I>alpha</I>
+parameter (energy units), the 4th argument is the <I>epsilon</I> parameter
+(energy-distance^6 units), and the 5th argument is the <I>Rm</I> parameter
+(distance units).  If a species tag of "1fluid" is listed as a pair
+coefficient, a one-fluid approximation is specified where a
+concentration-dependent combination of the parameters is computed
+through the following equations:
+</P>
+<CENTER><IMG SRC = "Eqs/pair_exp6_rx_oneFluid.jpg">
+</CENTER>
+<P>where
+</P>
+<CENTER><IMG SRC = "Eqs/pair_exp6_rx_oneFluid2.jpg">
+</CENTER>
+<P>and xa and xb are the mole fractions of a and b, respectively, which
+comprise the gas mixture.
+</P>
+<HR>
+
+<P><B>Mixing, shift, table, tail correction, restart, rRESPA info</B>:
+</P>
+<P>This pair style does not support mixing.  Thus, coefficients for all
+I,J pairs must be specified explicitly.
+</P>
+<P>This style does not support the <A HREF = "pair_modify.html">pair_modify</A> shift option
+for the energy of the exp() and 1/r^6 portion of the pair interaction.
+</P>
+<P>This style does not support the pair_modify tail option for adding long-range
+tail corrections to energy and pressure for the A,C terms in the
+pair interaction.
+</P>
+<P><B>Restrictions:</B>
+</P>
+<P>This command is part of the USER-DPD package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_coeff.html">pair_coeff</A>
+</P>
+<P><B>Default:</B> fractional weighting
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,143 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>compute coord/atom command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>compute ID group-ID coord/atom cstyle args ... 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "compute.html">compute</A> command 
+
+<LI>coord/atom = style name of this compute command 
+
+<LI>cstyle = <I>cutoff</I> or <I>orientorder</I> 
+
+<PRE>  <I>cutoff</I> args = cutoff typeN
+    cutoff = distance within which to count coordination neighbors (distance units)
+    typeN = atom type for Nth coordination count (see asterisk form below)
+  <I>orientorder</I> args = orientorderID threshold
+    orientorderID = ID of an orientorder/atom compute
+    threshold = minimum value of the product of two "connected" atoms 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>compute 1 all coord/atom cutoff 2.0
+compute 1 all coord/atom cutoff 6.0 1 2
+compute 1 all coord/atom cutoff 6.0 2*4 5*8 *
+compute 1 all coord/atom orientorder 2 0.5 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>This compute performs calculations between neighboring atoms to
+determine a coordination value.  The specific calculation and the
+meaning of the resulting value depend on the <I>cstyle</I> keyword used.
+</P>
+<P>The <I>cutoff</I> cstyle calculates one or more traditional coordination
+numbers for each atom.  A coordination number is defined as the number
+of neighbor atoms with specified atom type(s) that are within the
+specified cutoff distance from the central atom.  Atoms not in the
+specified group are included in the coordination number tally.
+</P>
+<P>The <I>typeN</I> keywords allow specification of which atom types
+contribute to each coordination number.  One coordination number is
+computed for each of the <I>typeN</I> keywords listed.  If no <I>typeN</I>
+keywords are listed, a single coordination number is calculated, which
+includes atoms of all types (same as the "*" format, see below).
+</P>
+<P>The <I>typeN</I> keywords can be specified in one of two ways.  An explicit
+numeric value can be used, as in the 2nd example above.  Or a
+wild-card asterisk can be used to specify a range of atom types.  This
+takes the form "*" or "*n" or "n*" or "m*n".  If N = the number of
+atom types, then an asterisk with no numeric values means all types
+from 1 to N.  A leading asterisk means all types from 1 to n
+(inclusive).  A trailing asterisk means all types from n to N
+(inclusive).  A middle asterisk means all types from m to n
+(inclusive).
+</P>
+<P>The <I>orientorder</I> cstyle calculates the number of "connected" neighbor
+atoms J around each central atom I.  For this <I>cstyle</I>, connected is
+defined by the orientational order parameter calculated by the
+<A HREF = "compute_orientorder_atom.html">compute orientorder/atom</A> command.
+This <I>cstyle</I> thus allows one to apply the ten Wolde's criterion to
+identify crystal-like atoms in a system, as discussed in <A HREF = "#tenWolde1">ten
+Wolde</A>.
+</P>
+<P>The ID of the previously specified <A HREF = "compute_orientorder/atom">compute
+orientorder/atom</A> command is specified as
+<I>orientorderID</I>.  The compute must invoke its <I>components</I> option to
+calculate components of the <I>Ybar_lm</I> vector for each atoms, as
+described in its documentation.  Note that orientorder/atom compute
+defines its own criteria for identifying neighboring atoms.  If the
+scalar product (<I>Ybar_lm(i)</I>,<I>Ybar_lm(j)</I>), calculated by the
+orientorder/atom compute is larger than the specified <I>threshold</I>,
+then I and J are connected, and the coordination value of I is
+incremented by one.
+</P>
+<P>For all <I>cstyle</I> settings, all coordination values will be 0.0 for
+atoms not in the specified compute group.
+</P>
+<P>The neighbor list needed to compute this quantity is constructed each
+time the calculation is performed (i.e. each time a snapshot of atoms
+is dumped).  Thus it can be inefficient to compute/dump this quantity
+too frequently.
+</P>
+<P>NOTE: If you have a bonded system, then the settings of
+<A HREF = "special_bonds.html">special_bonds</A> command can remove pairwise
+interactions between atoms in the same bond, angle, or dihedral.  This
+is the default setting for the <A HREF = "special_bonds.html">special_bonds</A>
+command, and means those pairwise interactions do not appear in the
+neighbor list.  Because this fix uses the neighbor list, it also means
+those pairs will not be included in the coordination count.  One way
+to get around this, is to write a dump file, and use the
+<A HREF = "rerun.html">rerun</A> command to compute the coordination for snapshots
+in the dump file.  The rerun script can use a
+<A HREF = "special_bonds.html">special_bonds</A> command that includes all pairs in
+the neighbor list.
+</P>
+<P><B>Output info:</B>
+</P>
+<P>For <I>cstyle</I> cutoff, this compute can calculate a per-atom vector or
+array.  If single <I>type1</I> keyword is specified (or if none are
+specified), this compute calculates a per-atom vector.  If multiple
+<I>typeN</I> keywords are specified, this compute calculates a per-atom
+array, with N columns.
+</P>
+<P>For <I>cstyle</I> orientorder, this compute calculates a per-atom vector.
+</P>
+<P>These values can be accessed by any command that uses per-atom values
+from a compute as input.  See <A HREF = "Section_howto.html#howto_15">Section
+6.15</A> for an overview of LAMMPS output
+options.
+</P>
+<P>The per-atom vector or array values will be a number >= 0.0, as
+explained above.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "compute_cluster_atom.html">compute cluster/atom</A>
+<A HREF = "compute_orientorder_atom.html">compute orientorder/atom</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "tenWolde1"></A>
+
+<P><B>(tenWolde)</B> P. R. ten Wolde, M. J. Ruiz-Montero, D. Frenkel,
+J. Chem. Phys. 104, 9932 (1996).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

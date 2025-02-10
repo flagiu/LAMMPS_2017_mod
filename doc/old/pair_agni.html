@@ -1,0 +1,138 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>pair_style agni command 
+</H3>
+<H3>pair_style agni/omp command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>pair_style agni 
+</PRE>
+<P><B>Examples:</B>
+pair_style      agni
+pair_coeff      * * Al.agni Al
+</P>
+<P><B>Description:</B>
+</P>
+<P>Style <I>agni</I> style computes the manybody vectorial force components for
+an atom as
+</P>
+<CENTER><IMG SRC = "Eqs/pair_agni.jpg">
+</CENTER>
+<P><I>u</I> labels the individual components, i.e. x, y or z, and <I>V</I> is the
+corresponding atomic fingerprint. <I>d</I> is the Euclidean distance between
+any two atomic fingerprints. A total of N_t reference atomic
+environments are considered to construct the force field file. <I>alpha_t</I>
+and <I>l</I> are the weight coefficients and length scale parameter of the
+non-linear regression model.
+</P>
+<P>The method implements the recently proposed machine learning access to
+atomic forces as discussed extensively in the following publications -
+<A HREF = "#Botu2015adaptive">(Botu1)</A> and <A HREF = "#Botu2015learning">(Botu2)</A>. The premise
+of the method is to map the atomic environment numerically into a
+fingerprint, and use machine learning methods to create a mapping to the
+vectorial atomic forces.
+</P>
+<P>Only a single pair_coeff command is used with the <I>agni</I> style which
+specifies an AGNI potential file containing the parameters of the
+force field for the needed elements. These are mapped to LAMMPS atom
+types by specifying N additional arguments after the filename in the
+pair_coeff command, where N is the number of LAMMPS atom types:
+</P>
+<UL><LI>filename
+<LI>N element names = mapping of AGNI elements to atom types 
+</UL>
+<P>See the <A HREF = "pair_coeff.html">pair_coeff</A> doc page for alternate ways
+to specify the path for the force field file.
+</P>
+<P>An AGNI force field is fully specified by the filename which contains the
+parameters of the force field, i.e., the reference training environments
+used to construct the machine learning force field. Example force field
+and input files are provided in the examples/USER/misc/agni directory.
+</P>
+<HR>
+
+<P>Styles with <I>omp</I> suffix is functionally the same as the corresponding
+style without the suffix. They have been optimized to run faster, depending
+on your available hardware, as discussed in <A HREF = "Section_accelerate.html">Section 5</A>
+of the manual.  The accelerated style takes the same arguments and
+should produce the same results, except for round-off and precision
+issues.
+</P>
+<P>The accelerated style is part of the USER-OMP.  They are only enabled if
+LAMMPS was built with those packages.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>You can specify the accelerated style explicitly in your input script
+by including their suffix, or you can use the <A HREF = "Section_start.html#start_6">-suffix command-line
+switch</A> when you invoke LAMMPS, or you can
+use the <A HREF = "suffix.html">suffix</A> command in your input script.
+</P>
+<P>See <A HREF = "Section_accelerate.html">Section 5</A> of the manual for
+more instructions on how to use the accelerated styles effectively.
+</P>
+<HR>
+
+<P><B>Mixing, shift, table, tail correction, restart, rRESPA info</B>:
+</P>
+<P>This pair style does not support the <A HREF = "pair_modify.html">pair_modify</A>
+shift, table, and tail options.
+</P>
+<P>This pair style does not write its information to <A HREF = "restart.html">binary restart
+files</A>, since it is stored in potential files.  Thus, you
+need to re-specify the pair_style and pair_coeff commands in an input
+script that reads a restart file.
+</P>
+<P>This pair style can only be used via the <I>pair</I> keyword of the
+<A HREF = "run_style.html">run_style respa</A> command.  It does not support the
+<I>inner</I>, <I>middle</I>, <I>outer</I> keywords.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>Currently, only elemental systems are implemented. Also, the method only
+provides access to the forces and not energies or stresses. However, one
+can access the energy via thermodynamic integration of the forces as
+discussed in <A HREF = "#Botu2016construct">(Botu3)</A>.  This pair style is part
+of the USER-MISC package. It is only enabled if LAMMPS was built with
+that package. See the <A HREF = "Section_start.html#start_3">Making LAMMPS</A> section
+for more info.
+</P>
+<P>The AGNI force field files provided with LAMMPS (see the
+potentials directory) are parameterized for metal <A HREF = "units.html">units</A>.
+You can use the AGNI potential with any LAMMPS units, but you would need
+to create your own AGNI potential file with coefficients listed in the
+appropriate units if your simulation doesn't use "metal" units.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_coeff.html">pair_coeff</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Botu2015adaptive"></A>
+
+<P><B>(Botu1)</B> V. Botu and R. Ramprasad, Int. J. Quant. Chem., 115(16), 1074 (2015).
+</P>
+<A NAME = "Botu2015learning"></A>
+
+<P><B>(Botu2)</B> V. Botu and R. Ramprasad, Phys. Rev. B, 92(9), 094306 (2015).
+</P>
+<A NAME = "Botu2016construct"></A>
+
+<P><B>(Botu3)</B> V. Botu, R. Batra, J. Chapman and R. Ramprasad, https://arxiv.org/abs/1610.02098 (2016).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,123 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>info command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>info args 
+</PRE>
+<UL><LI>args = one or more of the following keywords: <I>out</I>, <I>all</I>, <I>system</I>, <I>memory</I>, <I>communication</I>, <I>computes</I>, <I>dumps</I>, <I>fixes</I>, <I>groups</I>, <I>regions</I>, <I>variables</I>, <I>styles</I>, <I>time</I>, or <I>configuration</I>
+<LI>     <I>out</I> values = <I>screen</I>, <I>log</I>, <I>append</I> filename, <I>overwrite</I> filename
+<LI>     <I>styles</I> values = <I>all</I>, <I>angle</I>, <I>atom</I>, <I>bond</I>, <I>compute</I>, <I>command</I>, <I>dump</I>, <I>dihedral</I>, <I>fix</I>, <I>improper</I>, <I>integrate</I>, <I>kspace</I>, <I>minimize</I>, <I>pair</I>, <I>region</I> 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>info system
+info groups computes variables
+info all out log
+info all out append info.txt
+info styles all
+info styles atom 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Print out information about the current internal state of the running
+LAMMPS process. This can be helpful when debugging or validating
+complex input scripts.  Several output categories are available and
+one or more output category may be requested.
+</P>
+<P>The <I>out</I> flag controls where the output is sent. It can only be sent
+to one target. By default this is the screen, if it is active. The
+<I>log</I> argument selects the log file instead. With the <I>append</I> and
+<I>overwrite</I> option, followed by a filename, the output is written
+to that file, which is either appended to or overwritten, respectively.
+</P>
+<P>The <I>all</I> flag activates printing all categories listed below.
+</P>
+<P>The <I>configuration</I> category prints some information about the
+LAMMPS version as well as architecture and OS it is run on.
+</P>
+<P>The <I>memory</I> category prints some information about the current
+memory allocation of MPI rank 0 (this the amount of dynamically
+allocated memory reported by LAMMPS classes). Where supported,
+also some OS specific information about the size of the reserved
+memory pool size (this is where malloc() and the new operator
+request memory from) and the maximum resident set size is reported
+(this is the maximum amount of physical memory occupied so far).
+</P>
+<P>The <I>system</I> category prints a general system overview listing.  This
+includes the unit style, atom style, number of atoms, bonds, angles,
+dihedrals, and impropers and the number of the respective types, box
+dimensions and properties, force computing styles and more.
+</P>
+<P>The <I>communication</I> category prints a variety of information about
+communication and parallelization: the MPI library version level,
+the number of MPI ranks and OpenMP threads, the communication style
+and layout, the processor grid dimensions, ghost atom communication
+mode, cutoff, and related settings.
+</P>
+<P>The <I>computes</I> category prints a list of all currently defined
+computes, their IDs and styles and groups they operate on.
+</P>
+<P>The <I>dumps</I> category prints a list of all currently active dumps,
+their IDs, styles, filenames, groups, and dump frequencies.
+</P>
+<P>The <I>fixes</I> category prints a list of all currently defined fixes,
+their IDs and styles and groups they operate on.
+</P>
+<P>The <I>groups</I> category prints a list of all currently defined groups.
+</P>
+<P>The <I>regions</I> category prints a list of all currently defined regions,
+their IDs and styles and whether "inside" or "outside" atoms are
+selected.
+</P>
+<P>The <I>variables</I> category prints a list of all currently defined
+variables, their names, styles, definition and last computed value, if
+available.
+</P>
+<P>The <I>styles</I> category prints the list of styles available in the
+current LAMMPS binary. It supports one of the following options
+to control which category of styles is printed out:
+</P>
+<UL><LI>all
+<LI>angle
+<LI>atom
+<LI>bond
+<LI>compute
+<LI>command
+<LI>dump
+<LI>dihedral
+<LI>fix
+<LI>improper
+<LI>integrate
+<LI>kspace
+<LI>minimize
+<LI>pair
+<LI>region 
+</UL>
+<P>The <I>time</I> category prints the accumulated CPU and wall time for the
+process that writes output (usually MPI rank 0).
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "print.html">print</A>
+</P>
+<P><B>Default:</B>
+</P>
+<P>The <I>out</I> option has the default <I>screen</I>.
+</P>
+<P>The <I>styles</I> option has the default <I>all</I>.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

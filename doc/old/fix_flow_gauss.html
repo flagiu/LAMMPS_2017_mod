@@ -1,0 +1,176 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix flow/gauss command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID flow/gauss xflag yflag zflag keyword 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>flow/gauss = style name of this fix command 
+
+<LI>xflag,yflag,zflag = 0 or 1 
+
+<PRE>    0 = do not conserve current in this dimension
+    1 = conserve current in this dimension 
+</PRE>
+<LI>zero or more keyword/value pairs may be appended 
+
+<LI>keyword = <I>energy</I> 
+
+<PRE>  <I>energy</I> value = no or yes
+    no = do not compute work done by this fix
+    yes = compute work done by this fix 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix GD fluid flow/gauss 1 0 0
+fix GD fluid flow/gauss 1 1 1 energy yes 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>This fix implements the Gaussian dynamics (GD) method to simulate a
+system at constant mass flux <A HREF = "#Strong">(Strong)</A>. GD is a
+nonequilibrium molecular dynamics simulation method that can be used
+to study fluid flows through pores, pipes, and channels. In its
+original implementation GD was used to compute the pressure required
+to achieve a fixed mass flux through an opening.  The flux can be
+conserved in any combination of the directions, x, y, or z, using
+xflag,yflag,zflag. This fix does not initialize a net flux through a
+system, it only conserves the center-of-mass momentum that is present
+when the fix is declared in the input script. Use the
+<A HREF = "velocity.html">velocity</A> command to generate an initial center-of-mass
+momentum.
+</P>
+<P>GD applies an external fluctuating gravitational field that acts as a
+driving force to keep the system away from equilibrium. To maintain
+steady state, a profile-unbiased thermostat must be implemented to
+dissipate the heat that is added by the driving force. <A HREF = "compute_temp_profile.html">Compute
+temp/profile</A> can be used to implement a
+profile-unbiased thermostat.
+</P>
+<P>A common use of this fix is to compute a pressure drop across a pipe,
+pore, or membrane. The pressure profile can be computed in LAMMPS with
+<A HREF = "compute_stress_atom.html">compute stress/atom</A> and <A HREF = "fix_ave_chunk.html">fix
+ave/chunk</A>, or with the hardy method in <A HREF = "fix_atc.html">fix
+atc</A>. Note that the simple <A HREF = "compute_stress_atom.html">compute
+stress/atom</A> method is only accurate away
+from inhomogeneities in the fluid, such as fixed wall atoms. Further,
+the computed pressure profile must be corrected for the acceleration
+applied by GD before computing a pressure drop or comparing it to
+other methods, such as the pump method <A HREF = "#Zhu">(Zhu)</A>. The pressure
+correction is discussed and described in <A HREF = "#Strong">(Strong)</A>.
+</P>
+<P>For a complete example including the considerations discussed
+above, see the examples/USER/flow_gauss directory.
+</P>
+<P>NOTE: Only the flux of the atoms in group-ID will be conserved. If the
+velocities of the group-ID atoms are coupled to the velocities of
+other atoms in the simulation, the flux will not be conserved. For
+example, in a simulation with fluid atoms and harmonically constrained
+wall atoms, if a single thermostat is applied to group <I>all</I>, the
+fluid atom velocities will be coupled to the wall atom velocities, and
+the flux will not be conserved. This issue can be avoided by
+thermostatting the fluid and wall groups separately.
+</P>
+<P>Adding an acceleration to atoms does work on the system. This added
+energy can be optionally subtracted from the potential energy for the
+thermodynamic output (see below) to check that the timestep is small
+enough to conserve energy. Since the applied acceleration is
+fluctuating in time, the work cannot be computed from a potential. As
+a result, computing the work is slightly more computationally
+expensive than usual, so it is not performed by default. To invoke the
+work calculation, use the <I>energy</I> keyword. The
+<A HREF = "fix_modify.html">fix_modify</A> <I>energy</I> option also invokes the work
+calculation, and overrides an <I>energy no</I> setting here. If neither
+<I>energy yes</I> or <I>fix_modify energy yes</I> are set, the global scalar
+computed by the fix will return zero.
+</P>
+<P>NOTE: In order to check energy conservation, any other fixes that do
+work on the system must have <I>fix_modify energy yes</I> set as well. This
+includes thermostat fixes and any constraints that hold the positions
+of wall atoms fixed, such as <A HREF = "fix_spring_self.html">fix spring/self</A>.
+</P>
+<P>If this fix is used in a simulation with the <A HREF = "run_style.html">rRESPA</A>
+integrator, the applied acceleration must be computed and applied at the same
+rRESPA level as the interactions between the flowing fluid and the obstacle.
+The rRESPA level at which the acceleration is applied can be changed using
+the <A HREF = "fix_modify.html">fix_modify</A> <I>respa</I> option discussed below. If the
+flowing fluid and the obstacle interact through multiple interactions that are
+computed at different rRESPA levels, then there must be a separate flow/gauss
+fix for each level. For example, if the flowing fluid and obstacle interact
+through pairwise and long-range Coulomb interactions, which are computed at
+rRESPA levels 3 and 4, respectively, then there must be two separate
+flow/gauss fixes, one that specifies <I>fix_modify respa 3</I> and one with
+<I>fix_modify respa 4</I>.
+</P>
+<HR>
+
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>This fix is part of the USER-MISC package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>No information about this fix is written to <A HREF = "restart.html">binary restart
+files</A>.
+</P>
+<P>The <A HREF = "fix_modify.html">fix_modify</A> <I>energy</I> option is supported by this
+fix to subtract the work done from the
+system's potential energy as part of <A HREF = "thermo_style.html">thermodynamic
+output</A>.
+</P>
+<P>The <A HREF = "fix_modify.html">fix_modify</A> <I>respa</I> option is supported by this
+fix. This allows the user to set at which level of the <A HREF = "run_style.html">rRESPA</A>
+integrator the fix computes and adds the external acceleration. Default is the
+outermost level.
+</P>
+<P>This fix computes a global scalar and a global 3-vector of forces,
+which can be accessed by various <A HREF = "Section_howto.html#howto_15">output
+commands</A>.  The scalar is the negative of the
+work done on the system, see above discussion.  The vector is the total force
+that this fix applied to the group of atoms on the current timestep.
+The scalar and vector values calculated by this fix are "extensive".
+</P>
+<P>No parameter of this fix can be used with the <I>start/stop</I> keywords of
+the <A HREF = "run.html">run</A> command.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_addforce.html">fix addforce</A>, <A HREF = "compute_temp_profile.html">compute
+temp/profile</A>, <A HREF = "velocity.html">velocity</A>
+</P>
+<P><B>Default:</B>
+</P>
+<P>The option default for the <I>energy</I> keyword is energy = no.
+</P>
+<HR>
+
+<A NAME = "Strong"></A>
+
+<P><B>(Strong)</B> Strong and Eaves, J. Phys. Chem. B 121, 189 (2017).
+</P>
+<A NAME = "Evans2"></A>
+
+<P><B>(Evans)</B> Evans and Morriss, Phys. Rev. Lett. 56, 2172 (1986).
+</P>
+<A NAME = "Zhu"></A>
+
+<P><B>(Zhu)</B> Zhu, Tajkhorshid, and Schulten, Biophys. J. 83, 154 (2002).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

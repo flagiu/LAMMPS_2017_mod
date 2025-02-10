@@ -1,0 +1,128 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>timer command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>timer args 
+</PRE>
+<LI><I>args</I> = one or more of <I>off</I> or <I>loop</I> or <I>normal</I> or <I>full</I> or <I>sync</I> or <I>nosync</I> or <I>timeout</I> or <I>every</I> 
+
+<PRE>  <I>off</I> = do not collect or print any timing information
+  <I>loop</I> = collect only the total time for the simulation loop
+  <I>normal</I> = collect timer information broken down by sections (default)
+  <I>full</I> = like <I>normal</I> but also include CPU and thread utilization
+  <I>sync</I> = explicitly synchronize MPI tasks between sections
+  <I>nosync</I> = do not synchronize MPI tasks between sections (default)
+  <I>timeout</I> elapse = set walltime limit to <I>elapse</I>
+  <I>every</I> Ncheck = perform timeout check every <I>Ncheck</I> steps 
+</PRE>
+<P><B>Examples:</B>
+</P>
+<PRE>timer full sync
+timer timeout 2:00:00 every 100
+timer loop 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Select the level of detail at which LAMMPS performs its CPU timings.
+Multiple keywords can be specified with the <I>timer</I> command.  For
+keywords that are mutually exclusive, the last one specified takes
+precedence.
+</P>
+<P>During a simulation run LAMMPS collects information about how much
+time is spent in different sections of the code and thus can provide
+information for determining performance and load imbalance problems.
+This can be done at different levels of detail and accuracy.  For more
+information about the timing output, see this <A HREF = "Section_start.html#start_7">discussion of screen
+output in Section 2.7</A>.
+</P>
+<P>The <I>off</I> setting will turn all time measurements off. The <I>loop</I>
+setting will only measure the total time for a run and not collect any
+detailed per section information.  With the <I>normal</I> setting, timing
+information for portions of the timestep (pairwise calculations,
+neighbor list construction, output, etc) are collected as well as
+information about load imbalances for those sections across
+processors.  The <I>full</I> setting adds information about CPU
+utilization and thread utilization, when multi-threading is enabled.
+</P>
+<P>With the <I>sync</I> setting, all MPI tasks are synchronized at each timer
+call which measures load imbalance for each section more accurately,
+though it can also slow down the simulation by prohibiting overlapping
+independent computations on different MPI ranks  Using the <I>nosync</I>
+setting (which is the default) turns this synchronization off.
+</P>
+<P>With the <I>timeout</I> keyword a walltime limit can be imposed, that
+affects the <A HREF = "run.html">run</A> and <A HREF = "minimize.html">minimize</A> commands.
+This can be convenient when calculations have to comply with execution
+time limits, e.g. when running under a batch system when you want to
+maximize the utilization of the batch time slot, especially for runs
+where the time per timestep varies much and thus it becomes difficult
+to predict how many steps a simulation can perform for a given walltime
+limit. This also applies for difficult to converge minimizations.
+The timeout <I>elapse</I> value should be somewhat smaller than the maximum
+wall time requested from the batch system, as there is usually
+some overhead to launch jobs, and it is advisable to write
+out a restart after terminating a run due to a timeout.
+</P>
+<P>The timeout timer starts when the command is issued. When the time
+limit is reached, the run or energy minimization will exit on the
+next step or iteration that is a multiple of the <I>Ncheck</I> value
+which can be set with the <I>every</I> keyword. Default is checking
+every 10 steps. After the timer timeout has expired all subsequent
+run or minimize commands in the input script will be skipped.
+The remaining time or timer status can be accessed with the
+<A HREF = "thermo_style.html">thermo</A> variable <I>timeremain</I>, which will be
+zero, if the timeout is inactive (default setting), it will be
+negative, if the timeout time is expired and positive if there
+is time remaining and in this case the value of the variable are
+the number of seconds remaining.
+</P>
+<P>When the <I>timeout</I> key word is used a second time, the timer is
+restarted with a new time limit. The timeout <I>elapse</I> value can
+be specified as <I>off</I> or <I>unlimited</I> to impose a no timeout condition
+(which is the default).  The <I>elapse</I> setting can be specified as
+a single number for seconds, two numbers separated by a colon (MM:SS)
+for minutes and seconds, or as three numbers separated by colons for
+hours, minutes, and seconds (H:MM:SS).
+</P>
+<P>The <I>every</I> keyword sets how frequently during a run or energy
+minimization the wall clock will be checked.  This check count applies
+to the outer iterations or time steps during minimizations or <A HREF = "run_style.html">r-RESPA
+runs</A>, respectively.  Checking for timeout too often,
+can slow a calculation down.  Checking too infrequently can make the
+timeout measurement less accurate, with the run being stopped later
+than desired.
+</P>
+<P>NOTE: Using the <I>full</I> and <I>sync</I> options provides the most detailed
+and accurate timing information, but can also have a negative
+performance impact due to the overhead of the many required system
+calls. It is thus recommended to use these settings only when testing
+tests to identify performance bottlenecks. For calculations with few
+atoms or a very large number of processors, even the <I>normal</I> setting
+can have a measurable negative performance impact. In those cases you
+can just use the <I>loop</I> or <I>off</I> setting.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "run.html">run post no</A>, <A HREF = "kspace_modify.html">kspace_modify fftbench</A>
+</P>
+<P><B>Default:</B>
+</P>
+<PRE>timer normal nosync
+timer timeout off
+timer every 10 
+</PRE>
+<!-- PAGE BREAK -->
+</HTML>

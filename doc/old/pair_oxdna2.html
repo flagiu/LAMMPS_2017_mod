@@ -1,0 +1,116 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>pair_style oxdna2/excv command 
+</H3>
+<H3>pair_style oxdna2/stk command 
+</H3>
+<H3>pair_style oxdna2/hbond command 
+</H3>
+<H3>pair_style oxdna2/xstk command 
+</H3>
+<H3>pair_style oxdna2/coaxstk command 
+</H3>
+<H3>pair_style oxdna2/dh command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>pair_style style1 
+</PRE>
+<PRE>pair_coeff * * style2 args 
+</PRE>
+<UL><LI>style1 = <I>hybrid/overlay oxdna2/excv oxdna2/stk oxdna2/hbond oxdna2/xstk oxdna2/coaxstk oxdna2/dh</I> 
+</UL>
+<UL><LI>style2 = <I>oxdna2/stk</I> or <I>oxdna2/dh</I>
+<LI>args = list of arguments for these two particular styles 
+</UL>
+<PRE>  <I>oxdna2/stk</I> args = T 6.0 0.4 0.9 0.32 0.6 1.3 0 0.8 0.9 0 0.95 0.9 0 0.95 2.0 0.65 2.0 0.65
+    T = temperature (oxDNA units, 0.1 = 300 K)
+  <I>oxdna2/dh</I> args = T rhos qeff
+    T = temperature (oxDNA units, 0.1 = 300 K)
+    rhos = salt concentration (mole per litre)
+    qeff = effective charge (elementary charges) 
+</PRE>
+<P><B>Examples:</B>
+</P>
+<PRE>pair_style hybrid/overlay oxdna2/excv oxdna2/stk oxdna2/hbond oxdna2/xstk oxdna2/coaxstk oxdna2/dh
+pair_coeff * * oxdna2/excv    2.0 0.7 0.675 2.0 0.515 0.5 2.0 0.33 0.32
+pair_coeff * * oxdna2/stk     0.1 6.0 0.4 0.9 0.32 0.6 1.3 0 0.8 0.9 0 0.95 0.9 0 0.95 2.0 0.65 2.0 0.65
+pair_coeff * * oxdna2/hbond   0.0 8.0 0.4 0.75 0.34 0.7 1.5 0 0.7 1.5 0 0.7 1.5 0 0.7 0.46 3.141592653589793 0.7 4.0 1.5707963267948966 0.45 4.0 1.5707963267948966 0.45
+pair_coeff 1 4 oxdna2/hbond   1.0678 8.0 0.4 0.75 0.34 0.7 1.5 0 0.7 1.5 0 0.7 1.5 0 0.7 0.46 3.141592653589793 0.7 4.0 1.5707963267948966 0.45 4.0 1.5707963267948966 0.45
+pair_coeff 2 3 oxdna2/hbond   1.0678 8.0 0.4 0.75 0.34 0.7 1.5 0 0.7 1.5 0 0.7 1.5 0 0.7 0.46 3.141592653589793 0.7 4.0 1.5707963267948966 0.45 4.0 1.5707963267948966 0.45
+pair_coeff * * oxdna2/xstk    47.5 0.575 0.675 0.495 0.655 2.25 0.791592653589793 0.58 1.7 1.0 0.68 1.7 1.0 0.68 1.5 0 0.65 1.7 0.875 0.68 1.7 0.875 0.68
+pair_coeff * * oxdna2/coaxstk 58.5 0.4 0.6 0.22 0.58 2.0 2.891592653589793 0.65 1.3 0 0.8 0.9 0 0.95 0.9 0 0.95 40.0 3.116592653589793
+pair_coeff * * oxdna2/dh      0.1 1.0 0.815 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>The <I>oxdna2</I> pair styles compute the pairwise-additive parts of the oxDNA force field
+for coarse-grained modelling of DNA. The effective interaction between the nucleotides consists of potentials for the
+excluded volume interaction <I>oxdna2/excv</I>, the stacking <I>oxdna2/stk</I>, cross-stacking <I>oxdna2/xstk</I>
+and coaxial stacking interaction <I>oxdna2/coaxstk</I>, electrostatic Debye-Hueckel interaction <I>oxdna2/dh</I>
+as well as the hydrogen-bonding interaction <I>oxdna2/hbond</I> between complementary pairs of nucleotides on
+opposite strands.
+</P>
+<P>The exact functional form of the pair styles is rather complex.
+The individual potentials consist of products of modulation factors,
+which themselves are constructed from a number of more basic potentials
+(Morse, Lennard-Jones, harmonic angle and distance) as well as quadratic smoothing and modulation terms.
+We refer to <A HREF = "#Snodin">(Snodin)</A> and the original oxDNA publications <A HREF = "#Ouldridge-DPhil2">(Ouldridge-DPhil)</A>
+and  <A HREF = "#Ouldridge2">(Ouldridge)</A> for a detailed description of the oxDNA2 force field.
+</P>
+<P>NOTE: These pair styles have to be used together with the related oxDNA2 bond style
+<I>oxdna2/fene</I> for the connectivity of the phosphate backbone (see also documentation of
+<A HREF = "bond_oxdna.html">bond_style oxdna2/fene</A>). Almost all coefficients
+in the above example have to be kept fixed and cannot be changed without reparametrizing the entire model.
+Exceptions are the first coefficient after <I>oxdna2/stk</I> (T=0.1 in the above example) and the coefficients
+after <I>oxdna2/dh</I> (T=0.1, rhos=1.0, qeff=0.815 in the above example). When using a Langevin thermostat
+e.g. through <A HREF = "fix_langevin.html">fix langevin</A> or <A HREF = "fix_nve_dotc_langevin.html">fix nve/dotc/langevin</A>
+the temperature coefficients have to be matched to the one used in the fix.
+</P>
+<P>Example input and data files for DNA duplexes can be found in examples/USER/cgdna/examples/oxDNA/ and /oxDNA2/.
+A simple python setup tool which creates single straight or helical DNA strands,
+DNA duplexes or arrays of DNA duplexes can be found in examples/USER/cgdna/util/.
+A technical report with more information on the model, the structure of the input file,
+the setup tool and the performance of the LAMMPS-implementation of oxDNA
+can be found <A HREF = "PDF/USER-CGDNA-overview.pdf">here</A>.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>These pair styles can only be used if LAMMPS was built with the
+USER-CGDNA package and the MOLECULE and ASPHERE package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info on packages.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "bond_oxdna.html">bond_style oxdna2/fene</A>, <A HREF = "fix_nve_dotc_langevin.html">fix nve/dotc/langevin</A>, <A HREF = "pair_coeff.html">pair_coeff</A>,
+<A HREF = "bond_oxdna.html">bond_style oxdna/fene</A>, <A HREF = "pair_oxdna.html">pair_style oxdna/excv</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Snodin"></A>
+
+<P><B>(Snodin)</B> B.E. Snodin, F. Randisi, M. Mosayebi, et al., J. Chem. Phys. 142, 234901 (2015).
+</P>
+<A NAME = "Ouldridge-DPhil2"></A>
+
+<P><B>(Ouldrigde-DPhil)</B> T.E. Ouldridge, Coarse-grained modelling of DNA and DNA self-assembly, DPhil. University of Oxford (2011).
+</P>
+<A NAME = "Ouldridge2"></A>
+
+<P><B>(Ouldridge)</B> T.E. Ouldridge, A.A. Louis, J.P.K. Doye, J. Chem. Phys. 134, 085101 (2011).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

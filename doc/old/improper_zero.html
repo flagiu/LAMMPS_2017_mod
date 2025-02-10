@@ -1,0 +1,54 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>improper_style zero command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>improper_style zero <I>nocoeff</I> 
+</PRE>
+<P><B>Examples:</B>
+</P>
+<PRE>improper_style zero
+improper_style zero nocoeff
+improper_coeff * 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Using an improper style of zero means improper forces and energies are
+not computed, but the geometry of improper quadruplets is still
+accessible to other commands.
+</P>
+<P>As an example, the <A HREF = "compute_improper_local.html">compute
+improper/local</A> command can be used to
+compute the chi values for the list of quadruplets of improper atoms
+listed in the data file read by the <A HREF = "read_data.html">read_data</A>
+command.  If no improper style is defined, this command cannot be
+used.
+</P>
+<P>The optional <I>nocoeff</I> flag allows to read data files with a ImproperCoeff
+section for any improper style. Similarly, any improper_coeff commands
+will only be checked for the improper type number and the rest ignored.
+</P>
+<P>Note that the <A HREF = "improper_coeff.html">improper_coeff</A> command must be
+used for all improper types, though no additional values are
+specified.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B> none
+</P>
+<P><A HREF = "improper_none.html">improper_style none</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

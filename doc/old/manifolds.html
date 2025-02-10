@@ -1,0 +1,50 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>Manifolds (surfaces) 
+</H3>
+<P><B>Overview:</B>
+</P>
+<P>This doc page is not about a LAMMPS input script command, but about
+manifolds, which are generalized surfaces, as defined and used by the
+USER-MANIFOLD package, to track particle motion on the manifolds.  See
+the src/USER-MANIFOLD/README file for more details about the package
+and its commands.
+</P>
+<P>Below is a list of currently supported manifolds by the USER-MANIFOLD
+package, their parameters and a short description of them.  The
+parameters listed here are in the same order as they should be passed
+to the relevant fixes.
+</P>
+<DIV ALIGN=center><TABLE  BORDER=1 >
+<TR><TD ><I>manifold</I> </TD><TD > <I>parameters</I> </TD><TD > <I>equation</I> </TD><TD > <I>description</I></TD></TR>
+<TR><TD >cylinder </TD><TD > R </TD><TD > x^2 + y^2 - R^2 = 0 </TD><TD > Cylinder along z-axis, axis going through (0,0,0)</TD></TR>
+<TR><TD >cylinder_dent </TD><TD > R l a </TD><TD > x^2 + y^2 - r(z)^2 = 0, r(x) = R if | z | > l, r(z) = R - a*(1 + cos(z/l))/2 otherwise </TD><TD > A cylinder with a dent around z = 0</TD></TR>
+<TR><TD >dumbbell </TD><TD > a A B c </TD><TD > -( x^2 + y^2 ) + (a^2 - z^2/c^2) * ( 1 + (A*sin(B*z^2))^4) = 0 </TD><TD > A dumbbell</TD></TR>
+<TR><TD >ellipsoid </TD><TD > a  b c </TD><TD > (x/a)^2 + (y/b)^2 + (z/c)^2 = 0 </TD><TD > An ellipsoid</TD></TR>
+<TR><TD >gaussian_bump </TD><TD > A l rc1 rc2 </TD><TD > if( x < rc1) -z + A * exp( -x^2 / (2 l^2) ); else if( x < rc2 ) -z + a + b*x + c*x^2 + d*x^3; else z </TD><TD > A Gaussian bump at x = y = 0, smoothly tapered to a flat plane z = 0.</TD></TR>
+<TR><TD >plane </TD><TD > a b c x0 y0 z0 </TD><TD > a*(x-x0) + b*(y-y0) + c*(z-z0) = 0 </TD><TD > A plane with normal (a,b,c) going through point (x0,y0,z0)</TD></TR>
+<TR><TD >plane_wiggle </TD><TD > a w </TD><TD > z - a*sin(w*x) = 0 </TD><TD > A plane with a sinusoidal modulation on z along x.</TD></TR>
+<TR><TD >sphere </TD><TD > R </TD><TD > x^2 + y^2 + z^2 - R^2 = 0 </TD><TD > A sphere of radius R</TD></TR>
+<TR><TD >supersphere </TD><TD > R q </TD><TD > | x |^q + | y |^q + | z |^q - R^q = 0 </TD><TD > A supersphere of hyperradius R</TD></TR>
+<TR><TD >spine </TD><TD > a, A, B, B2, c </TD><TD > -(x^2 + y^2) + (a^2 - z^2/f(z)^2)*(1 + (A*sin(g(z)*z^2))^4), f(z) = c if z > 0, 1 otherwise; g(z) = B if z > 0, B2 otherwise  </TD><TD > An approximation to a dendtritic spine</TD></TR>
+<TR><TD >spine_two </TD><TD > a, A, B, B2, c </TD><TD > -(x^2 + y^2) + (a^2 - z^2/f(z)^2)*(1 + (A*sin(g(z)*z^2))^2), f(z) = c if z > 0, 1 otherwise; g(z) = B if z > 0, B2 otherwise  </TD><TD > Another approximation to a dendtritic spine</TD></TR>
+<TR><TD >thylakoid </TD><TD > wB LB lB </TD><TD > Various, see <A HREF = "#Paquay1">(Paquay)</A> </TD><TD > A model grana thylakoid consisting of two block-like compartments connected by a bridge of width wB, length LB and taper length lB</TD></TR>
+<TR><TD >torus </TD><TD > R r  </TD><TD >  (R - sqrt( x^2 + y^2 ) )^2 + z^2 - r^2  </TD><TD > A torus with large radius R and small radius r, centered on (0,0,0) 
+</TD></TR></TABLE></DIV>
+
+<A NAME = "Paquay1"></A>
+
+<P><B>(Paquay)</B> Paquay and Kusters, Biophys. J., 110, 6, (2016).
+preprint available at <A HREF = "http://arxiv.org/abs/1411.3019/">arXiv:1411.3019</A>.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

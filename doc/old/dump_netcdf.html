@@ -1,0 +1,88 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>dump netcdf command 
+</H3>
+<H3>dump netcdf/mpiio command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>dump ID group-ID netcdf N file args
+dump ID group-ID netcdf/mpiio N file args 
+</PRE>
+<UL><LI>ID = user-assigned name for the dump 
+
+<LI>group-ID = ID of the group of atoms to be imaged 
+
+<LI><I>netcdf</I> or <I>netcdf/mpiio</I>  = style of dump command (other styles <I>atom</I> or <I>cfg</I> or <I>dcd</I> or <I>xtc</I> or <I>xyz</I> or <I>local</I> or <I>custom</I> are discussed on the <A HREF = "dump.html">dump</A> doc page) 
+
+<LI>N = dump every this many timesteps 
+
+<LI>file = name of file to write dump info to 
+
+<LI>args = list of atom attributes, same as for <A HREF = "dump.html">dump_style custom</A> 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>dump 1 all netcdf 100 traj.nc type x y z vx vy vz
+dump_modify 1 append yes at -1 thermo yes
+dump 1 all netcdf/mpiio 1000 traj.nc id type x y z 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Dump a snapshot of atom coordinates every N timesteps in Amber-style
+NetCDF file format.  NetCDF files are binary, portable and
+self-describing.  This dump style will write only one file on the root
+node.  The dump style <I>netcdf</I> uses the <A HREF = "http://www.unidata.ucar.edu/software/netcdf/">standard NetCDF
+library</A>.  All data is collected on one processor and then
+written to the dump file.  Dump style <I>netcdf/mpiio</I> uses the
+<A HREF = "http://trac.mcs.anl.gov/projects/parallel-netcdf/">parallel NetCDF library</A> and MPI-IO to write to the dump
+file in parallel; it has better performance on a larger number of
+processors.  Note that style <I>netcdf</I> outputs all atoms sorted by atom
+tag while style <I>netcdf/mpiio</I> outputs atoms in order of their MPI
+rank.
+</P>
+<P>NetCDF files can be directly visualized via the following tools:
+</P>
+Ovito (http://www.ovito.org/). Ovito supports the AMBER convention and
+all extensions of this dump style. 
+<BR></UL>
+<LI>VMD (http://www.ks.uiuc.edu/Research/vmd/). 
+
+<LI>AtomEye (http://www.libatoms.org/). The libAtoms version of AtomEye
+contains a NetCDF reader that is not present in the standard
+distribution of AtomEye. 
+</UL>
+<P>In addition to per-atom data, <A HREF = "thermo.html">thermo</A> data can be included in the
+dump file. The data included in the dump file is identical to the data specified
+by <A HREF = "thermo_style.html">thermo_style</A>.
+</P>
+
+
+
+
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>The <I>netcdf</I> and <I>netcdf/mpiio</I> dump styles are part of the
+USER-NETCDF package.  They are only enabled if LAMMPS was built with
+that package. See the <A HREF = "Section_start.html#start_3">Making LAMMPS</A>
+section for more info.
+</P>
+<HR>
+
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "dump.html">dump</A>, <A HREF = "dump_modify.html">dump_modify</A>, <A HREF = "undump.html">undump</A>
+</P>
+<!-- PAGE BREAK -->
+</HTML>

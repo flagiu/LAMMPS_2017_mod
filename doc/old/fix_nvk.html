@@ -1,0 +1,79 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix nvk command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID nvk 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command
+<LI>nvk = style name of this fix command 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix 1 all nvk 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Perform constant kinetic energy integration using the Gaussian
+thermostat to update position and velocity for atoms in the group each
+timestep.  V is volume; K is kinetic energy. This creates a system
+trajectory consistent with the isokinetic ensemble.
+</P>
+<P>The equations of motion used are those of Minary et al in
+<A HREF = "#nvk-Minary">(Minary)</A>, a variant of those initially given by Zhang in
+<A HREF = "#nvk-Zhang">(Zhang)</A>.
+</P>
+<P>The kinetic energy will be held constant at its value given when fix
+nvk is initiated. If a different kinetic energy is desired, the
+<A HREF = "velocity.html">velocity</A> command should be used to change the kinetic
+energy prior to this fix.
+</P>
+<HR>
+
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>No information about this fix is written to <A HREF = "restart.html">binary restart
+files</A>.  None of the <A HREF = "fix_modify.html">fix_modify</A> options
+are relevant to this fix.  No global or per-atom quantities are stored
+by this fix for access by various <A HREF = "Section_howto.html#howto_15">output
+commands</A>.  No parameter of this fix can
+be used with the <I>start/stop</I> keywords of the <A HREF = "run.html">run</A> command.
+This fix is not invoked during <A HREF = "minimize.html">energy minimization</A>.
+</P>
+<P><B>Restrictions:</B>
+</P>
+<P>The Gaussian thermostat only works when it is applied to all atoms in
+the simulation box. Therefore, the group must be set to all.
+</P>
+<P>This fix has not yet been implemented to work with the RESPA integrator.
+</P>
+<P>This fix is part of the USER-MISC package.  It is only enabled if LAMMPS
+was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P><B>Related commands:</B> none
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "nvk-Minary"></A>
+
+<P><B>(Minary)</B> Minary, Martyna, and Tuckerman, J Chem Phys, 18, 2510 (2003).
+</P>
+<A NAME = "nvk-Zhang"></A>
+
+<P><B>(Zhang)</B> Zhang, J Chem Phys, 106, 6102 (1997).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

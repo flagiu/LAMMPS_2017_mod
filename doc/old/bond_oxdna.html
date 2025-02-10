@@ -1,0 +1,88 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>bond_style oxdna/fene command 
+</H3>
+<H3>bond_style oxdna2/fene command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>bond_style oxdna/fene 
+</PRE>
+<PRE>bond_style oxdna2/fene 
+</PRE>
+<P><B>Examples:</B>
+</P>
+<PRE>bond_style oxdna/fene
+bond_coeff * 2.0 0.25 0.7525 
+</PRE>
+<PRE>bond_style oxdna2/fene
+bond_coeff * 2.0 0.25 0.7564 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>The <I>oxdna/fene</I> and <I>oxdna2/fene</I> bond styles use the potential
+</P>
+<CENTER><IMG SRC = "Eqs/bond_oxdna_fene.jpg">
+</CENTER>
+<P>to define a modified finite extensible nonlinear elastic (FENE) potential
+<A HREF = "#oxdna_fene">(Ouldridge)</A> to model the connectivity of the phosphate backbone
+in the oxDNA force field for coarse-grained modelling of DNA.
+</P>
+<P>The following coefficients must be defined for the bond type via the
+<A HREF = "bond_coeff.html">bond_coeff</A> command as given in the above example, or in
+the data file or restart files read by the <A HREF = "read_data.html">read_data</A>
+or <A HREF = "read_restart.html">read_restart</A> commands:
+</P>
+<UL><LI>epsilon (energy)
+<LI>Delta (distance)
+<LI>r0 (distance) 
+</UL>
+<P>NOTE: The oxDNA bond style has to be used together with the corresponding oxDNA pair styles
+for excluded volume interaction <I>oxdna/excv</I>, stacking <I>oxdna/stk</I>, cross-stacking <I>oxdna/xstk</I>
+and coaxial stacking interaction <I>oxdna/coaxstk</I> as well as hydrogen-bonding interaction <I>oxdna/hbond</I> (see also documentation of
+<A HREF = "pair_oxdna.html">pair_style oxdna/excv</A>). For the oxDNA2 <A HREF = "#oxdna2">(Snodin)</A> bond style the analogous pair styles and an additional Debye-Hueckel pair
+style <I>oxdna2/dh</I> have to be defined.
+The coefficients in the above example have to be kept fixed and cannot be changed without reparametrizing the entire model.
+</P>
+<P>Example input and data files for DNA duplexes can be found in examples/USER/cgdna/examples/oxDNA/ and /oxDNA2/.
+A simple python setup tool which creates single straight or helical DNA strands,
+DNA duplexes or arrays of DNA duplexes can be found in examples/USER/cgdna/util/.
+A technical report with more information on the model, the structure of the input file,
+the setup tool and the performance of the LAMMPS-implementation of oxDNA
+can be found <A HREF = "PDF/USER-CGDNA-overview.pdf">here</A>.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This bond style can only be used if LAMMPS was built with the
+USER-CGDNA package and the MOLECULE and ASPHERE package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info on packages.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_oxdna.html">pair_style oxdna/excv</A>, <A HREF = "pair_oxdna2.html">pair_style oxdna2/excv</A>, <A HREF = "fix_nve_dotc_langevin.html">fix nve/dotc/langevin</A>, <A HREF = "bond_coeff.html">bond_coeff</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "oxdna_fene"></A>
+
+<P><B>(Ouldridge)</B> T.E. Ouldridge, A.A. Louis, J.P.K. Doye, J. Chem. Phys. 134, 085101 (2011).
+</P>
+<A NAME = "oxdna2"></A>
+
+<P><B>(Snodin)</B> B.E. Snodin, F. Randisi, M. Mosayebi, et al., J. Chem. Phys. 142, 234901 (2015).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

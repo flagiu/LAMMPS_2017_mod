@@ -1,0 +1,83 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>compute_modify command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>compute_modify compute-ID keyword value ... 
+</PRE>
+<UL><LI>compute-ID = ID of the compute to modify 
+
+<LI>one or more keyword/value pairs may be listed 
+
+<LI>keyword = <I>extra/dof</I> or <I>extra</I> or <I>dynamic/dof</I> or <I>dynamic</I> 
+
+<PRE>  <I>extra/dof</I> value = N
+    N = # of extra degrees of freedom to subtract
+  <I>extra</I> syntax is identical to <I>extra/dof</I>, will be disabled at some point
+  <I>dynamic/dof</I> value = <I>yes</I> or <I>no</I>
+    yes/no = do or do not recompute the number of degrees of freedom (DOF) contributing to the temperature
+  <I>dynamic</I> syntax is identical to <I>dynamic/dof</I>, will be disabled at some point 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>compute_modify myTemp extra/dof 0
+compute_modify newtemp dynamic/dof yes extra/dof 600 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Modify one or more parameters of a previously defined compute.  Not
+all compute styles support all parameters.
+</P>
+<P>The <I>extra/dof</I> or <I>extra</I> keyword refers to how many
+degrees-of-freedom are subtracted (typically from 3N) as a normalizing
+factor in a temperature computation.  Only computes that compute a
+temperature use this option.  The default is 2 or 3 for <A HREF = "dimension.html">2d or 3d
+systems</A> which is a correction factor for an ensemble
+of velocities with zero total linear momentum. For compute
+temp/partial, if one or more velocity components are excluded, the
+value used for <I>extra</I> is scaled accordingly. You can use a negative
+number for the <I>extra</I> parameter if you need to add
+degrees-of-freedom.  See the <A HREF = "compute_temp_asphere.html">compute
+temp/asphere</A> command for an example.
+</P>
+<P>The <I>dynamic/dof</I> or <I>dynamic</I> keyword determines whether the number
+of atoms N in the compute group and their associated degrees of
+freedom are re-computed each time a temperature is computed.  Only
+compute styles that calculate a temperature use this option.  By
+default, N and their DOF are assumed to be constant.  If you are
+adding atoms or molecules to the system (see the <A HREF = "fix_pour.html">fix
+pour</A>, <A HREF = "fix_deposit.html">fix deposit</A>, and <A HREF = "fix_gcmc.html">fix
+gcmc</A> commands) or expect atoms or molecules to be lost
+(e.g. due to exiting the simulation box or via <A HREF = "fix_evaporate.html">fix
+evaporate</A>), then this option should be used to
+insure the temperature is correctly normalized.
+</P>
+<P>NOTE: The <I>extra</I> and <I>dynamic</I> keywords should not be used as they
+are deprecated (March 2017) and will eventually be disabled.  Instead,
+use the equivalent <I>extra/dof</I> and <I>dynamic/dof</I> keywords.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "compute.html">compute</A>
+</P>
+<P><B>Default:</B>
+</P>
+<P>The option defaults are extra/dof = 2 or 3 for 2d or 3d systems and
+dynamic/dof = no.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

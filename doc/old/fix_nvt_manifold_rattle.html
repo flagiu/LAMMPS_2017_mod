@@ -1,0 +1,92 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix nvt/manifold/rattle command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID nvt/manifold/rattle tol maxit manifold manifold-args keyword value ... 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>nvt/manifold/rattle = style name of this fix command  
+
+<LI>tol = tolerance to which Newton iteration must converge 
+
+<LI>maxit = maximum number of iterations to perform 
+
+<LI>manifold = name of the manifold 
+
+<LI>manifold-args = parameters for the manifold 
+
+<LI>one or more keyword/value pairs may be appended 
+
+<PRE>keyword = <I>temp</I> or <I>tchain</I> or <I>every</I>
+  <I>temp</I> values = Tstart Tstop Tdamp
+    Tstart, Tstop = external temperature at start/end of run
+    Tdamp = temperature damping parameter (time units)
+  <I>tchain</I> value = N
+    N = length of thermostat chain (1 = single thermostat)
+  <I>every</I> value = N
+    N = print info about iteration every N steps. N = 0 means no output 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<P>fix 1 all nvt/manifold/rattle 1e-4 10 cylinder 3.0 temp 1.0 1.0 10.0
+</P>
+<P><B>Description:</B>
+</P>
+<P>This fix combines the RATTLE-based <A HREF = "#Andersen2">(Andersen)</A> time integrator of <A HREF = "fix_nve_manifold_rattle.html">fix nve/manifold/rattle</A> <A HREF = "#Paquay3">(Paquay)</A> with a Nose-Hoover-chain thermostat to sample the
+canonical ensemble of particles constrained to a curved surface (manifold). This sampling does suffer from discretization bias of O(dt).
+For a list of currently supported manifolds and their parameters, see <A HREF = "manifolds.html">manifolds</A>
+</P>
+<HR>
+
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>No information about this fix is written to <A HREF = "restart.html">binary restart
+files</A>.  None of the <A HREF = "fix_modify.html">fix_modify</A> options
+are relevant to this fix.  No global or per-atom quantities are stored
+by this fix for access by various <A HREF = "Section_howto.html#howto_15">output
+commands</A>.  No parameter of this fix can
+be used with the <I>start/stop</I> keywords of the <A HREF = "run.html">run</A> command.
+This fix is not invoked during <A HREF = "minimize.html">energy minimization</A>.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This fix is part of the USER-MANIFOLD package. It is only enabled if LAMMPS
+was built with that package. See the <A HREF = "Section_start.html#start_3">Making LAMMPS</A>
+section for more info.
+</P>
+<HR>
+
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_nvt_manifold_rattle.html">fix nve/manifold/rattle</A>, <A HREF = "fix_manifoldforce.html">fix manifoldforce</A>
+<B>Default:</B> every = 0
+</P>
+<HR>
+
+<A NAME = "Andersen2"></A>
+
+<P><B>(Andersen)</B> Andersen, J. Comp. Phys. 52, 24, (1983).
+</P>
+<A NAME = "Paquay3"></A>
+
+<P><B>(Paquay)</B> Paquay and Kusters, Biophys. J., 110, 6, (2016).
+preprint available at <A HREF = "http://arxiv.org/abs/1411.3019/">arXiv:1411.3019</A>.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

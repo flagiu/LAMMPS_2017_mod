@@ -1,0 +1,224 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix controller command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID controller Nevery alpha Kp Ki Kd pvar setpoint cvar 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>controller = style name of this fix command 
+
+<LI>Nevery = invoke controller every this many timesteps 
+
+<LI>alpha = coupling constant for PID equation (see units discussion below) 
+
+<LI>Kp = proportional gain in PID equation (unitless) 
+
+<LI>Ki = integral gain in PID equation (unitless) 
+
+<LI>Kd = derivative gain in PID equation (unitless) 
+
+<LI>pvar = process variable of form c_ID, c_ID[I], f_ID, f_ID[I], or v_name 
+
+<PRE>  c_ID = global scalar calculated by a compute with ID
+  c_ID[I] = Ith component of global vector calculated by a compute with ID
+  f_ID = global scalar calculated by a fix with ID
+  f_ID[I] = Ith component of global vector calculated by a fix with ID
+  v_name = value calculated by an equal-style variable with name 
+</PRE>
+<LI>setpoint = desired value of process variable (same units as process variable) 
+
+<LI>cvar = name of control variable 
+
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix 1 all controller 100 1.0 0.5 0.0 0.0 c_thermo_temp 1.5 tcontrol
+fix 1 all controller 100 0.2 0.5 0 100.0 v_pxxwall 1.01325 xwall
+fix 1 all controller 10000 0.2 0.5 0 2000 v_avpe -3.785 tcontrol 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>This fix enables control of a LAMMPS simulation using a control loop
+feedback mechanism known as a proportional-integral-derivative (PID)
+controller.  The basic idea is to define a "process variable" which is
+a quantity that can be monitored during a running simulation.  A
+desired target value is chosen for the process variable.  A "control
+variable" is also defined which is an adjustable attribute of the
+running simulation, which the process variable will respond to.  The
+PID controller continuously adjusts the control variable based on the
+difference between the process variable and the target.
+</P>
+<P>Here are examples of ways in which this fix can be used.  The
+examples/pid directory contains a script that implements the simple
+thermostat.
+</P>
+<DIV ALIGN=center><TABLE  BORDER=1 >
+<TR><TD >Goal </TD><TD > process variable </TD><TD > control variable</TD></TR>
+<TR><TD >Simple thermostat </TD><TD > instantaneous T </TD><TD > thermostat target T</TD></TR>
+<TR><TD >Find melting temperature </TD><TD > average PE per atom </TD><TD > thermostat target T</TD></TR>
+<TR><TD >Control pressure in non-periodic system </TD><TD > force on wall </TD><TD > position of wall</TD></TR>
+<TR><TD >
+</TD></TR></TABLE></DIV>
+
+<P>NOTE: For this fix to work, the control variable must actually induce
+a change in a running LAMMPS simulation.  Typically this will only
+occur if there is some other command (e.g. a thermostat fix) which
+uses the control variable as an input parameter.  This could be done
+directly or indirectly, e.g. the other command uses a variable as
+input whose formula uses the control variable.  The other command
+should alter its behavior dynamically as the variable changes.
+</P>
+<P>NOTE: If there is a command you think could be used in this fashion,
+but does not currently allow a variable as an input parameter, please
+notify the LAMMPS developers.  It is often not difficult to enable a
+command to use a variable as an input parameter.
+</P>
+<P>The group specified with this command is ignored.  However, note that
+the process variable may be defined by calculations performed by
+computes and fixes which store their own "group" definitions.
+</P>
+<P>The PID controller is invoked once each <I>Nevery</I> timesteps.
+</P>
+<P>The PID controller is implemented as a discretized version of
+the following dynamic equation:
+</P>
+<CENTER><IMG SRC = "Eqs/fix_controller1.jpg">
+</CENTER>
+<P>where <I>c</I> is the continuous time analog of the control variable,
+<I>e</I>=<I>pvar</I>-<I>setpoint</I> is the error in the process variable, and
+<I>alpha</I>, <I>Kp</I>, <I>Ki</I>, and <I>Kd</I> are constants set by the corresponding
+keywords described above. The discretized version of this equation is:
+</P>
+<CENTER><IMG SRC = "Eqs/fix_controller2.jpg">
+</CENTER>
+<P>where <I>tau</I> = <I>Nevery</I> * <I>timestep</I> is the time interval between updates,
+and the subscripted variables indicate the values of <I>c</I> and <I>e</I> at
+successive updates.
+</P>
+<P>From the first equation, it is clear that if the three gain values
+<I>Kp</I>, <I>Ki</I>, <I>Kd</I> are dimensionless constants, then <I>alpha</I> must have
+units of [unit <I>cvar</I>]/[unit <I>pvar</I>]/[unit time] e.g. [ eV/K/ps
+]. The advantage of this unit scheme is that the value of the
+constants should be invariant under a change of either the MD timestep
+size or the value of <I>Nevery</I>. Similarly, if the LAMMPS <A HREF = "units.html">unit
+style</A> is changed, it should only be necessary to change
+the value of <I>alpha</I> to reflect this, while leaving <I>Kp</I>, <I>Ki</I>, and
+<I>Kd</I> unaltered.
+</P>
+<P>When choosing the values of the four constants, it is best to first
+pick a value and sign for <I>alpha</I> that is consistent with the
+magnitudes and signs of <I>pvar</I> and <I>cvar</I>.  The magnitude of <I>Kp</I>
+should then be tested over a large positive range keeping <I>Ki</I>=<I>Kd</I>=0.
+A good value for <I>Kp</I> will produce a fast response in <I>pvar</I>, without
+overshooting the <I>setpoint</I>.  For many applications, proportional
+feedback is sufficient, and so <I>Ki</I>=<I>Kd</I>=0 can be used. In cases where
+there is a substantial lag time in the response of <I>pvar</I> to a change
+in <I>cvar</I>, this can be counteracted by increasing <I>Kd</I>. In situations
+where <I>pvar</I> plateaus without reaching <I>setpoint</I>, this can be
+counteracted by increasing <I>Ki</I>.  In the language of Charles Dickens,
+<I>Kp</I> represents the error of the present, <I>Ki</I> the error of the past,
+and <I>Kd</I> the error yet to come.
+</P>
+<P>Because this fix updates <I>cvar</I>, but does not initialize its value,
+the initial value is that assigned by the user in the input script via
+the <A HREF = "variable.html">internal-style variable</A> command.  This value is
+used (by the other LAMMPS command that used the variable) until this
+fix performs its first update of <I>cvar</I> after <I>Nevery</I> timesteps.  On
+the first update, the value of the derivative term is set to zero,
+because the value of <I>e_n-1</I> is not yet defined.
+</P>
+<HR>
+
+<P>The process variable <I>pvar</I> can be specified as the output of a
+<A HREF = "compute.html">compute</A> or <A HREF = "fix.html">fix</A> or the evaluation of a
+<A HREF = "variable.html">variable</A>.  In each case, the compute, fix, or variable
+must produce a global quantity, not a per-atom or local quantity.
+</P>
+<P>If <I>pvar</I> begins with "c_", a compute ID must follow which has been
+previously defined in the input script and which generates a global
+scalar or vector.  See the individual <A HREF = "compute.html">compute</A> doc page
+for details.  If no bracketed integer is appended, the scalar
+calculated by the compute is used.  If a bracketed integer is
+appended, the Ith value of the vector calculated by the compute is
+used.  Users can also write code for their own compute styles and <A HREF = "Section_modify.html">add
+them to LAMMPS</A>.
+</P>
+<P>If <I>pvar</I> begins with "f_", a fix ID must follow which has been
+previously defined in the input script and which generates a global
+scalar or vector.  See the individual <A HREF = "fix.html">fix</A> doc page for
+details.  Note that some fixes only produce their values on certain
+timesteps, which must be compatible with when fix controller
+references the values, or else an error results.  If no bracketed integer
+is appended, the scalar calculated by the fix is used.  If a bracketed
+integer is appended, the Ith value of the vector calculated by the fix
+is used.  Users can also write code for their own fix style and <A HREF = "Section_modify.html">add
+them to LAMMPS</A>.
+</P>
+<P>If <I>pvar</I> begins with "v_", a variable name must follow which has been
+previously defined in the input script.  Only equal-style variables
+can be referenced.  See the <A HREF = "variable.html">variable</A> command for
+details.  Note that variables of style <I>equal</I> define a formula which
+can reference individual atom properties or thermodynamic keywords, or
+they can invoke other computes, fixes, or variables when they are
+evaluated, so this is a very general means of specifying the process
+variable.
+</P>
+<P>The target value <I>setpoint</I> for the process variable must be a numeric
+value, in whatever units <I>pvar</I> is defined for.
+</P>
+<P>The control variable <I>cvar</I> must be the name of an <A HREF = "variable.html">internal-style
+variable</A> previously defined in the input script.  Note
+that it is not specified with a "v_" prefix, just the name of the
+variable.  It must be an internal-style variable, because this fix
+updates its value directly.  Note that other commands can use an
+equal-style versus internal-style variable interchangeably.
+</P>
+<HR>
+
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>Currently, no information about this fix is written to <A HREF = "restart.html">binary restart
+files</A>.  None of the <A HREF = "fix_modify.html">fix_modify</A> options
+are relevant to this fix.
+</P>
+<P>This fix produces a global vector with 3 values which can be accessed
+by various <A HREF = "Section_howto.html#howto_15">output commands</A>.  The values
+can be accessed on any timestep, though they are only updated on
+timesteps that are a multiple of <I>Nevery</I>.
+</P>
+<P>The three values are the most recent updates made to the control
+variable by each of the 3 terms in the PID equation above.  The first
+value is the proportional term, the second is the integral term, the
+third is the derivative term.
+</P>
+<P>The units of the vector values will be whatever units the control
+variable is in.  The vector values calculated by this fix are
+"extensive".
+</P>
+<P>No parameter of this fix can be used with the <I>start/stop</I> keywords of
+the <A HREF = "run.html">run</A> command.  This fix is not invoked during <A HREF = "minimize.html">energy
+minimization</A>.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_adapt.html">fix adapt</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

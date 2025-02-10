@@ -1,0 +1,54 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>bond_style zero command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>bond_style zero <I>nocoeff</I> 
+</PRE>
+<P><B>Examples:</B>
+</P>
+<PRE>bond_style zero
+bond_style zero nocoeff
+bond_coeff *
+bond_coeff * 2.14 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Using an bond style of zero means bond forces and energies are not
+computed, but the geometry of bond pairs is still accessible to other
+commands.
+</P>
+<P>As an example, the <A HREF = "compute_bond_local.html">compute bond/local</A>
+command can be used to compute distances for the list of pairs of bond
+atoms listed in the data file read by the <A HREF = "read_data.html">read_data</A>
+command.  If no bond style is defined, this command cannot be used.
+</P>
+<P>The optional <I>nocoeff</I> flag allows to read data files with a BondCoeff
+section for any bond style. Similarly, any bond_coeff commands
+will only be checked for the bond type number and the rest ignored.
+</P>
+<P>Note that the <A HREF = "bond_coeff.html">bond_coeff</A> command must be used for
+all bond types. If specified, there can be only one value, which is
+going to be used to assign an equilibrium distance, e.g. for use with
+<A HREF = "fix_shake.html">fix shake</A>.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "bond_none.html">bond_style none</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

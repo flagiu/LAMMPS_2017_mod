@@ -1,0 +1,50 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>write_coeff command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>write_coeff file 
+</PRE>
+<PRE>file = name of data file to write out 
+</PRE>
+<P><B>Examples:</B>
+</P>
+<PRE>write_coeff polymer.coeff 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Write a text format file with the currently defined force field
+coefficients in a way, that it can be read by LAMMPS with the
+<A HREF = "include.html">include</A> command. In combination with the nocoeff
+option of <A HREF = "write_data.html">write_data</A> this can be used to move
+the Coeffs sections from a data file into a separate file.
+</P>
+<P>NOTE: The write_coeff command is not yet fully implemented in two
+respects.  First, some pair styles do not yet write their coefficient
+information into the coeff file.  This means you will need to specify
+that information in your input script that reads the data file, via
+the <A HREF = "pair_coeff.html">pair_coeff</A> command.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "read_data.html">read_data</A>, <A HREF = "write_restart.html">write_restart</A>,
+<A HREF = "write_data.html">write_data</A>
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,92 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>pair_style zero command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>pair_style zero cutoff <I>nocoeff</I> 
+</PRE>
+<UL><LI>zero = style name of this pair style
+<LI>cutoff = global cutoff (distance units)
+<LI>nocoeff = ignore all pair_coeff parameters (optional) 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>pair_style zero 10.0
+pair_style zero 5.0 nocoeff
+pair_coeff * *
+pair_coeff 1 2*4 3.0 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Define a global or per-type cutoff length for the purpose of
+building a neighbor list and acquiring ghost atoms, but do
+not compute any pairwise forces or energies.
+</P>
+<P>This can be useful for fixes or computes which require a neighbor list
+to enumerate pairs of atoms within some cutoff distance, but when
+pairwise forces are not otherwise needed.  Examples are the <A HREF = "fix_bond_create.html">fix
+bond/create</A>, <A HREF = "compute_rdf.html">compute rdf</A>,
+<A HREF = "compute_voronoi_atom.html">compute voronoi/atom</A> commands.
+</P>
+<P>Note that the <A HREF = "comm_modify.html">comm_modify cutoff</A> command can be
+used to insure communication of ghost atoms even when a pair style is
+not defined, but it will not trigger neighbor list generation.
+</P>
+<P>The optional <I>nocoeff</I> flag allows to read data files with a PairCoeff
+section for any pair style. Similarly, any pair_coeff commands
+will only be checked for the atom type numbers and the rest ignored.
+In this case, only the global cutoff will be used.
+</P>
+<P>The following coefficients must be defined for each pair of atoms
+types via the <A HREF = "pair_coeff.html">pair_coeff</A> command as in the examples
+above, or in the data file or restart files read by the
+<A HREF = "read_data.html">read_data</A> or <A HREF = "read_restart.html">read_restart</A>
+commands, or by mixing as described below:
+</P>
+<UL><LI>cutoff (distance units) 
+</UL>
+<P>This coefficient is optional.  If not specified, the global cutoff
+specified in the pair_style command is used. If the pair_style has
+been specified with the optional <I>nocoeff</I> flag, then a cutoff
+pair coefficient is ignored.
+</P>
+<HR>
+
+<P><B>Mixing, shift, table, tail correction, restart, rRESPA info</B>:
+</P>
+<P>The cutoff distance for this pair style can be mixed.  The default mix
+value is <I>geometric</I>.  See the "pair_modify" command for details.
+</P>
+<P>This pair style does not support the <A HREF = "pair_modify.html">pair_modify</A>
+shift, table, and tail options.
+</P>
+<P>This pair style writes its information to <A HREF = "restart.html">binary restart
+files</A>, so pair_style and pair_coeff commands do not need
+to be specified in an input script that reads a restart file.
+</P>
+<P>This pair style can only be used via the <I>pair</I> keyword of the
+<A HREF = "run_style.html">run_style respa</A> command.  It does not support the
+<I>inner</I>, <I>middle</I>, <I>outer</I> keywords.
+</P>
+<HR>
+
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_none.html">pair_style none</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

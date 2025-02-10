@@ -1,0 +1,202 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>create_bonds command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>create_bonds style args ... keyword value ... 
+</PRE>
+<LI>style = <I>many</I> or <I>single/bond</I> or <I>single/angle</I> or <I>single/dihedral</I> 
+</UL>
+<PRE>  <I>many</I> args = group-ID group2-ID btype rmin rmax
+    group-ID = ID of first group
+    group2-ID = ID of second group, bonds will be between atoms in the 2 groups
+    btype = bond type of created bonds
+    rmin = minimum distance between pair of atoms to bond together
+    rmax = minimum distance between pair of atoms to bond together
+  <I>single/bond</I> args = btype batom1 batom2
+    btype = bond type of new bond
+    batom1,batom2 = atom IDs for two atoms in bond
+  <I>single/angle</I> args = atype aatom1 aatom2 aatom3
+    atype = bond type of new angle
+    aatom1,aatom2,aatom3 = atom IDs for three atoms in angle
+  <I>single/dihedral</I> args = dtype datom1 datom2 datom3 datom4
+    dtype = bond type of new dihedral
+    datom1,datom2,datom3,datom4 = atom IDs for four atoms in dihedral 
+</PRE>
+<LI>zero or more keyword/value pairs may be appended 
+
+<LI>keyword = <I>special</I> 
+
+<PRE>  <I>special</I> value = <I>yes</I> or <I>no</I> 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>create_bonds many all all 1 1.0 1.2
+create_bonds many surf solvent 3 2.0 2.4
+create_bond single/bond 1 1 2
+create_bond single/angle 5 52 98 107 special no 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Create bonds between pairs of atoms that meet a specified distance
+criteria.  Or create a single bond, angle, or dihedral between 2, 3,
+or 4 specified atoms.
+</P>
+<P>The new bond (angle, dihedral) interactions will then be computed
+during a simulation by the bond (angle, dihedral) potential defined by
+the <A HREF = "bond_style.html">bond_style</A>, <A HREF = "bond_coeff.html">bond_coeff</A>,
+<A HREF = "angle_style.html">angle_style</A>, <A HREF = "angle_coeff.html">angle_coeff</A>,
+<A HREF = "dihedral_style.html">dihedral_style</A>,
+<A HREF = "dihedral_coeff.html">dihedral_coeff</A> commands.
+</P>
+<P>The <I>many</I> style is useful for adding bonds to a system, e.g. between
+nearest neighbors in a lattice of atoms, without having to enumerate
+all the bonds in the data file read by the <A HREF = "read_data.html">read_data</A>
+command.
+</P>
+<P>The <I>single</I> styles are useful for adding bonds, angles, dihedrals
+to a system incrementally, then continuing a simulation.
+</P>
+<P>Note that this command does not auto-create any angle or dihedral
+interactions when a bond is added.  Nor does it auto-create any bonds
+when an angle or dihedral is added.  Or auto-create any angles when a
+dihedral is added.  Thus the flexibility of this command is limited.
+It can be used several times to create different types of bond at
+different distances.  But it cannot typically auto-create all the
+bonds or angles or dihedral that would normally be defined in a data
+file for a complex system of molecules.
+</P>
+<P>NOTE: If the system has no bonds (angles, dihedrals) to begin with, or
+if more bonds per atom are being added than currently exist, then you
+must insure that the number of bond types and the maximum number of
+bonds per atom are set to large enough values.  And similarly for
+angles and dihedrals.  Otherwise an error may occur when too many
+bonds (angles, dihedrals) are added to an atom.  If the
+<A HREF = "read_data.html">read_data</A> command is used to define the system, these
+parameters can be set via the "bond types" and "extra bond per atom"
+fields in the header section of the data file.  If the
+<A HREF = "create_box.html">create_box</A> command is used to define the system,
+these 2 parameters can be set via its optional "bond/types" and
+"extra/bond/per/atom" arguments.  And similarly for angles and
+dihedrals.  See the doc pages for these 2 commands for details.
+</P>
+<HR>
+
+<P>The <I>many</I> style will create bonds between pairs of atoms I,J where I
+is in one of the two specified groups, and J is in the other.  The two
+groups can be the same, e.g. group "all".  The created bonds will be
+of bond type <I>btype</I>, where <I>btype</I> must be a value between 1 and the
+number of bond types defined. 
+</P>
+<P>For a bond to be created, an I,J pair of atoms must be a distance D
+apart such that <I>rmin</I> <= D <= <I>rmax</I>.
+</P>
+<P>The following settings must have been made in an input script before
+this style is used:
+</P>
+<UL><LI>special_bonds weight for 1-2 interactions must be 0.0
+<LI>a <A HREF = "pair_style.html">pair_style</A> must be defined
+<LI>no <A HREF = "kspace_style.html">kspace_style</A> defined
+<LI>minimum <A HREF = "pair_style.html">pair_style</A> cutoff + <A HREF = "neighbor.html">neighbor</A> skin >= <I>rmax</I> 
+</UL>
+<P>These settings are required so that a neighbor list can be created to
+search for nearby atoms.  Pairs of atoms that are already bonded
+cannot appear in the neighbor list, to avoid creation of duplicate
+bonds.  The neighbor list for all atom type pairs must also extend to
+a distance that encompasses the <I>rmax</I> for new bonds to create.
+</P>
+<P>An additional requirement for this style is that your system must be
+ready to perform a simulation.  This means, for example, that all
+<A HREF = "pair_style.html">pair_style</A> coefficients be set via the
+<A HREF = "pair_coeff.html">pair_coeff</A> command.  A <A HREF = "bond_style.html">bond_style</A>
+command and all bond coefficients must also be set, even if no bonds
+exist before this command is invoked.  This is because the building of
+neighbor list requires initialization and setup of a simulation,
+similar to what a <A HREF = "run.html">run</A> command would require.
+</P>
+<P>Note that you can change any of these settings after this command
+executes, e.g. if you wish to use long-range Coulombic interactions
+via the <A HREF = "kspace_style.html">kspace_style</A> command for your subsequent
+simulation.
+</P>
+<HR>
+
+<P>The <I>single/bond</I> style creates a single bond of type <I>btype</I> between
+two atoms with IDs <I>batom1</I> and <I>batom2</I>.  <I>Btype</I> must be a value
+between 1 and the number of bond types defined.
+</P>
+<P>The <I>single/angle</I> style creates a single angle of type <I>atype</I>
+between three atoms with IDs <I>aatom1</I>, <I>aatom2</I>, and <I>aatom3</I>.  The
+ordering of the atoms is the same as in the <I>Angles</I> section of a data
+file read by the <A HREF = "read_data">read_data</A> command.  I.e. the 3 atoms are
+ordered linearly within the angle; the central atom is <I>aatom2</I>.
+<I>Atype</I> must be a value between 1 and the number of angle types
+defined.
+</P>
+<P>The <I>single/dihedral</I> style creates a single dihedral of type <I>btype</I>
+between two atoms with IDs <I>batom1</I> and <I>batom2</I>.  The ordering of the
+atoms is the same as in the <I>Dihedrals</I> section of a data file read by
+the <A HREF = "read_data">read_data</A> command.  I.e. the 4 atoms are ordered
+linearly within the dihedral.  <I>Dtype</I> must be a value between 1 and
+the number of dihedral types defined.
+</P>
+<HR>
+
+<P>The keyword <I>special</I> controls whether an internal list of special
+bonds is created after one or more bonds, or a single angle or
+dihedral is added to the system.
+</P>
+<P>The default value is <I>yes</I>.  A value of <I>no</I> cannot be used
+with the <I>many</I> style.
+</P>
+<P>This is an expensive operation since the bond topology for the system
+must be walked to find all 1-2, 1-3, 1-4 interactions to store in an
+internal list, which is used when pairwise interactions are weighted;
+see the <A HREF = "special_bonds.html">special_bonds</A> command for details.
+</P>
+<P>Thus if you are adding a few bonds or a large list of angles all at
+the same time, by using this command repeatedly, it is more efficient
+to only trigger the internal list to be created once, after the last
+bond (or angle, or dihedral) is added:
+</P>
+<PRE>create_bonds single/bond 5 52 98 special no
+create_bonds single/bond  5 73 74 special no
+...
+create_bonds single/bond 5 17 386 special no
+create_bonds single/bond 4 112 183 special yes 
+</PRE>
+<P>Note that you MUST insure the internal list is re-built after the last
+bond (angle, dihedral) is added, before performing a simulation.
+Otherwise pairwise interactions will not be properly excluded or
+weighted.  LAMMPS does NOT check that you have done this correctly.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This command cannot be used with molecular systems defined using
+molecule template files via the <A HREF = "molecule.html">molecule</A> and
+<A HREF = "atom_style.html">atom_style template</A> commands.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "create_atoms.html">create_atoms</A>, <A HREF = "delete_bonds.html">delete_bonds</A>
+</P>
+<P><B>Default:</B>
+</P>
+<P>The keyword default is special = yes.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,94 @@
+<HTML>
+<CENTER><A HREF = "Section_example.html">Previous Section</A> - <A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> - <A HREF = "Section_tools.html">Next Section</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>8. Performance & scalability 
+</H3>
+<P>Current LAMMPS performance is discussed on the Benchmarks page of the
+<A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> where CPU timings and parallel efficiencies are
+listed.  The page has several sections, which are briefly described
+below:
+</P>
+<UL><LI>CPU performance on 5 standard problems, strong and weak scaling
+<LI>GPU and Xeon Phi performance on same and related problems
+<LI>Comparison of cost of interatomic potentials
+<LI>Performance of huge, billion-atom problems 
+</UL>
+<P>The 5 standard problems are as follow:
+</P>
+<OL><LI>LJ = atomic fluid, Lennard-Jones potential with 2.5 sigma cutoff (55
+neighbors per atom), NVE integration 
+
+<LI>Chain = bead-spring polymer melt of 100-mer chains, FENE bonds and LJ
+pairwise interactions with a 2^(1/6) sigma cutoff (5 neighbors per
+atom), NVE integration 
+
+<LI>EAM = metallic solid, Cu EAM potential with 4.95 Angstrom cutoff (45
+neighbors per atom), NVE integration 
+
+<LI>Chute = granular chute flow, frictional history potential with 1.1
+sigma cutoff (7 neighbors per atom), NVE integration 
+
+<LI>Rhodo = rhodopsin protein in solvated lipid bilayer, CHARMM force
+field with a 10 Angstrom LJ cutoff (440 neighbors per atom),
+particle-particle particle-mesh (PPPM) for long-range Coulombics, NPT
+integration 
+
+
+</OL>
+<P>Input files for these 5 problems are provided in the bench directory
+of the LAMMPS distribution.  Each has 32,000 atoms and runs for 100
+timesteps.  The size of the problem (number of atoms) can be varied
+using command-line switches as described in the bench/README file.
+This is an easy way to test performance and either strong or weak
+scalability on your machine.
+</P>
+<P>The bench directory includes a few log.* files that show performance
+of these 5 problems on 1 or 4 cores of Linux desktop.  The bench/FERMI
+and bench/KEPLER dirs have input files and scripts and instructions
+for running the same (or similar) problems using OpenMP or GPU or Xeon
+Phi acceleration options.  See the README files in those dirs and the
+<A HREF = "Section_accelerate.html#acc_3">Section 5.3</A> doc pages for
+instructions on how to build LAMMPS and run on that kind of hardware.
+</P>
+<P>The bench/POTENTIALS directory has input files which correspond to the
+table of results on the
+<A HREF = "http://lammps.sandia.gov/bench.html#potentials">Potentials</A> section of
+the Benchmarks web page.  So you can also run those test problems on
+your machine.
+</P>
+<P>The <A HREF = "http://lammps.sandia.gov/bench.html#billion">billion-atom</A> section
+of the Benchmarks web page has performance data for very large
+benchmark runs of simple Lennard-Jones (LJ) models, which use the
+bench/in.lj input script.
+</P>
+<HR>
+
+<P>For all the benchmarks, a useful metric is the CPU cost per atom per
+timestep.  Since performance scales roughly linearly with problem size
+and timesteps for all LAMMPS models (i.e. interatomic or coarse-grained
+potentials), the run time of any problem using the same model (atom
+style, force field, cutoff, etc) can then be estimated.
+</P>
+<P>Performance on a parallel machine can also be predicted from one-core
+or one-node timings if the parallel efficiency can be estimated.  The
+communication bandwidth and latency of a particular parallel machine
+affects the efficiency.  On most machines LAMMPS will give parallel
+efficiencies on these benchmarks above 50% so long as the number of
+atoms/core is a few 100 or greater, and closer to 100% for large
+numbers of atoms/core.  This is for all-MPI mode with one MPI task per
+core.  For nodes with accelerator options or hardware (OpenMP, GPU,
+Phi), you should first measure single node performance.  Then you can
+estimate parallel performance for multi-node runs using the same logic
+as for all-MPI mode, except that now you will typically need many more
+atoms/node to achieve good scalability.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

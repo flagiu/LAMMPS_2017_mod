@@ -1,0 +1,78 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>compute dpd command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>compute ID group-ID dpd 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "compute.html">compute</A> command
+<LI>dpd = style name of this compute command 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>compute 1 all dpd 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Define a computation that accumulates the total internal conductive
+energy (U_cond), the total internal mechanical energy (U_mech), the
+total chemical energy (U_chem) and the <I>harmonic</I> average of the internal
+temperature (dpdTheta) for the entire system of particles.  See the
+<A HREF = "compute_dpd_atom.html">compute dpd/atom</A> command if you want
+per-particle internal energies and internal temperatures.
+</P>
+<P>The system internal properties are computed according to the following
+relations:
+</P>
+<CENTER><IMG SRC = "Eqs/compute_dpd.jpg">
+</CENTER>
+<P>where N is the number of particles in the system
+</P>
+<HR>
+
+<P><B>Output info:</B>
+</P>
+<P>This compute calculates a global vector of length 5 (U_cond, U_mech,
+U_chem, dpdTheta, N_particles), which can be accessed by indices 1-5.  See
+<A HREF = "Section_howto.html#howto_15">this section</A> for an overview of LAMMPS
+output options.
+</P>
+<P>The vector values will be in energy and temperature <A HREF = "units.html">units</A>.
+</P>
+<P><B>Restrictions:</B>
+</P>
+<P>This command is part of the USER-DPD package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>This command also requires use of the <A HREF = "atom_style.html">atom_style dpd</A>
+command.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "compute_dpd_atom.html">compute dpd/atom</A>,
+<A HREF = "thermo_style.html">thermo_style</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Larentzos1"></A>
+
+<P><B>(Larentzos)</B> J.P. Larentzos, J.K. Brennan, J.D. Moore, and
+W.D. Mattson, "LAMMPS Implementation of Constant Energy Dissipative
+Particle Dynamics (DPD-E)", ARL-TR-6863, U.S. Army Research
+Laboratory, Aberdeen Proving Ground, MD (2014).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

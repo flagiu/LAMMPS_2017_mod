@@ -1,0 +1,80 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>pair_style momb command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>pair_style momb cutoff s6 d 
+</PRE>
+<UL><LI>cutoff = global cutoff (distance units)
+<LI>s6 = global scaling factor of the exchange-correlation functional used (unitless)
+<LI>d = damping scaling factor of Grimme's method (unitless) 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>pair_style momb 12.0 0.75 20.0
+pair_style hybrid/overlay eam/fs lj/charmm/coul/long 10.0 12.0 momb 12.0 0.75 20.0 morse 5.5 
+</PRE>
+<PRE>pair_coeff 1 2 momb 0.0 1.0 1.0 10.2847 2.361 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Style <I>momb</I> computes pairwise van der Waals (vdW) and short-range
+interactions using the Morse potential and <A HREF = "#Grimme">(Grimme)</A> method
+implemented in the Many-Body Metal-Organic (MOMB) force field
+described comprehensively in <A HREF = "#Fichthorn">(Fichthorn)</A> and
+<A HREF = "#Zhou4">(Zhou)</A>. Grimme's method is widely used to correct for
+dispersion in density functional theory calculations.
+</P>
+<CENTER><IMG SRC = "Eqs/pair_momb.jpg">
+</CENTER>
+<P>For the <I>momb</I> pair style, the following coefficients must be defined
+for each pair of atoms types via the <A HREF = "pair_coeff.html">pair_coeff</A>
+command as in the examples above, or in the data file or restart files
+read by the <A HREF = "read_data.html">read_data</A> as described below:
+</P>
+<UL><LI>D0 (energy units)
+<LI>alpha (1/distance units)
+<LI>r0 (distance units)
+<LI>C6 (energy*distance^6 units)
+<LI>Rr (distance units, typically sum of atomic vdW radii) 
+</UL>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This style is part of the USER-MISC package. It is only enabled if
+LAMMPS is built with that package. See the <A HREF = "Section_start.html#start_3">Making of
+LAMMPS</A> section for more info.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_coeff.html">pair_coeff</A>, <A HREF = "pair_morse.html">pair_style morse</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Grimme"></A>
+
+<P><B>(Grimme)</B> Grimme, J Comput Chem, 27(15), 1787-1799 (2006).
+</P>
+<A NAME = "Fichthorn"></A>
+
+<P><B>(Fichthorn)</B> Fichthorn, Balankura, Qi, CrystEngComm, 18(29), 5410-5417 (2016).
+</P>
+<A NAME = "Zhou4"></A>
+
+<P><B>(Zhou)</B> Zhou, Saidi, Fichthorn, J Phys Chem C, 118(6), 3366-3374 (2014).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

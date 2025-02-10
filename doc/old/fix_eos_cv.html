@@ -1,0 +1,67 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix eos/cv command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID eos/cv cv 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command
+<LI>eos/cv = style name of this fix command
+<LI>cv = constant-volume heat capacity (energy/temperature units) 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix 1 all eos/cv 0.01 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Fix <I>eos/cv</I> applies a mesoparticle equation of state to relate the
+particle internal energy (u_i) to the particle internal temperature
+(dpdTheta_i).  The <I>eos/cv</I> mesoparticle equation of state requires
+the constant-volume heat capacity, and is defined as follows:
+</P>
+<CENTER><IMG SRC = "Eqs/fix_eos-cv.jpg">
+</CENTER>
+<P>where Cv is the constant-volume heat capacity, u_cond is the internal
+conductive energy, and u_mech is the internal mechanical energy.  Note
+that alternative definitions of the mesoparticle equation of state are
+possible.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This command is part of the USER-DPD package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>This command also requires use of the <A HREF = "atom_style.html">atom_style dpd</A>
+command.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_shardlow.html">fix shardlow</A>, <A HREF = "pair_dpd_fdt.html">pair dpd/fdt</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Larentzos4"></A>
+
+<P><B>(Larentzos)</B> J.P. Larentzos, J.K. Brennan, J.D. Moore, and
+W.D. Mattson, "LAMMPS Implementation of Constant Energy Dissipative
+Particle Dynamics (DPD-E)", ARL-TR-6863, U.S. Army Research
+Laboratory, Aberdeen Proving Ground, MD (2014).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

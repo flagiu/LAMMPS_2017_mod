@@ -1,0 +1,143 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix cmap command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID cmap filename 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command
+<LI>cmap = style name of this fix command
+<LI>filename = force-field file with CMAP coefficients 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix            myCMAP all cmap ../potentials/cmap36.data
+read_data      proteinX.data fix myCMAP crossterm CMAP
+fix_modify     myCMAP energy yes 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>This command enables CMAP crossterms to be added to simulations which
+use the CHARMM force field.  These are relevant for any CHARMM model
+of a peptide or protein sequences that is 3 or more amino-acid
+residues long; see <A HREF = "#Buck">(Buck)</A> and <A HREF = "#Brooks2">(Brooks)</A> for details,
+including the analytic energy expressions for CMAP interactions.  The
+CMAP crossterms add additional potential energy contributions to pairs
+of overlapping phi-psi dihedrals of amino-acids, which are important
+to properly represent their conformational behavior.
+</P>
+<P>The examples/cmap directory has a sample input script and data file
+for a small peptide, that illustrates use of the fix cmap command.
+</P>
+<P>As in the example above, this fix should be used before reading a data
+file that contains a listing of CMAP interactions.  The <I>filename</I>
+specified should contain the CMAP parameters for a particular version
+of the CHARMM force field.  Two such files are including in the
+lammps/potentials directory: charmm22.cmap and charmm36.cmap.
+</P>
+<P>The data file read by the "read_data" must contain the topology of all
+the CMAP interactions, similar to the topology data for bonds, angles,
+dihedrals, etc.  Specially it should have a line like this
+in its header section:
+</P>
+<PRE>N crossterms 
+</PRE>
+<P>where N is the number of CMAP crossterms.  It should also have a section
+in the body of the data file like this with N lines:
+</P>
+<PRE>CMAP 
+</PRE>
+<PRE>       1       1       8      10      12      18      20
+       2       5      18      20      22      25      27
+       [...]
+       N       3     314     315     317      318    330 
+</PRE>
+<P>The first column is an index from 1 to N to enumerate the CMAP terms;
+it is ignored by LAMMPS.  The 2nd column is the "type" of the
+interaction; it is an index into the CMAP force field file.  The
+remaining 5 columns are the atom IDs of the atoms in the two 4-atom
+dihedrals that overlap to create the CMAP 5-body interaction.  Note
+that the "crossterm" and "CMAP" keywords for the header and body
+sections match those specified in the read_data command following the
+data file name; see the <A HREF = "read_data.html">read_data</A> doc page for
+more details.
+</P>
+<P>A data file containing CMAP crossterms can be generated from a PDB
+file using the charmm2lammps.pl script in the tools/ch2lmp directory
+of the LAMMPS distribution.  The script must be invoked with the
+optional "-cmap" flag to do this; see the tools/ch2lmp/README file for
+more information.
+</P>
+<P>The potential energy associated with CMAP interactions can be output
+as described below.  It can also be included in the total potential
+energy of the system, as output by the
+<A HREF = "thermo_style.html">thermo_style</A> command, if the <A HREF = "fix_modify.html">fix_modify
+energy</A> command is used, as in the example above.  See
+the note below about how to include the CMAP energy when performing an
+<A HREF = "minimize.html">energy minimization</A>.
+</P>
+<HR>
+
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>This fix writes the list of CMAP crossterms to <A HREF = "restart.html">binary restart
+files</A>.  See the <A HREF = "read_restart.html">read_restart</A> command
+for info on how to re-specify a fix in an input script that reads a
+restart file, so that the operation of the fix continues in an
+uninterrupted fashion.
+</P>
+<P>The <A HREF = "fix_modify.html">fix_modify</A> <I>energy</I> option is supported by this
+fix to add the potential "energy" of the CMAP interactions system's
+potential energy as part of <A HREF = "thermo_style.html">thermodynamic output</A>.
+</P>
+<P>This fix computes a global scalar which can be accessed by various
+<A HREF = "Section_howto.html#howto_15">output commands</A>.  The scalar is the
+potential energy discussed above.  The scalar value calculated by this
+fix is "extensive".
+</P>
+<P>No parameter of this fix can be used with the <I>start/stop</I> keywords of
+the <A HREF = "run.html">run</A> command.
+</P>
+<P>The forces due to this fix are imposed during an energy minimization,
+invoked by the <A HREF = "minimize.html">minimize</A> command.
+</P>
+<P>NOTE: If you want the potential energy associated with the CMAP terms
+forces to be included in the total potential energy of the system (the
+quantity being minimized), you MUST enable the
+<A HREF = "fix_modify.html">fix_modify</A> <I>energy</I> option for this fix.
+</P>
+<P><B>Restrictions:</B>
+</P>
+<P>This fix can only be used if LAMMPS was built with the MOLECULE
+package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info on packages.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_modify.html">fix_modify</A>, <A HREF = "read_data.html">read_data</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Buck"></A>
+
+<P><B>(Buck)</B> Buck, Bouguet-Bonnet, Pastor, MacKerell Jr., Biophys J, 90, L36
+(2006).
+</P>
+<A NAME = "Brooks2"></A>
+
+<P><B>(Brooks)</B> Brooks, Brooks, MacKerell Jr., J Comput Chem, 30, 1545 (2009).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

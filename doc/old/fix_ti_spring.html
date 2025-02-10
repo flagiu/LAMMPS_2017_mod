@@ -1,0 +1,180 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix ti/spring command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID ti/spring k t_s t_eq keyword value ... 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>ti/spring = style name of this fix command 
+
+<LI>k = spring constant (force/distance units) 
+
+<LI>t_eq = number of steps for the equilibration procedure 
+
+<LI>t_s = number of steps for the switching procedure 
+
+<LI>zero or more keyword/value pairs may be appended to args 
+
+<LI>keyword = <I>function</I> 
+
+<PRE>  <I>function</I> value = function-ID
+    function-ID = ID of the switching function (1 or 2) 
+</PRE>
+
+</UL>
+<P><B>Example:</B>
+</P>
+<PRE>fix 1 all ti/spring 50.0 2000 1000 function 2 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>This fix allows you to compute the free energy of crystalline solids
+by performing a nonequilibrium thermodynamic integration between the
+solid of interest and an Einstein crystal. A detailed explanation of
+how to use this command and choose its parameters for optimal
+performance and accuracy is given in the paper by
+<A HREF = "#Freitas">Freitas</A>. The paper also presents a short summary of the
+theory of nonequilibrium thermodynamic integrations.
+</P>
+<P>The thermodynamic integration procedure is performed by rescaling the
+force on each atom. Given an atomic configuration the force (F) on
+each atom is given by
+</P>
+<CENTER><IMG SRC = "Eqs/fix_ti_spring_force.jpg">
+</CENTER>
+<P>where F_solid is the force that acts on an atom due to an interatomic
+potential (<I>e.g.</I> EAM potential), F_harm is the force due to the
+Einstein crystal harmonic spring, and lambda is the coupling parameter
+of the thermodynamic integration. An Einstein crystal is a solid where
+each atom is attached to its equilibrium position by a harmonic spring
+with spring constant <I>k</I>. With this fix a spring force is applied
+independently to each atom in the group defined by the fix to tether
+it to its initial position. The initial position of each atom is its
+position at the time the fix command was issued.
+</P>
+<P>The fix acts as follows: during the first <I>t_eq</I> steps after the fix
+is defined the value of lambda is zero. This is the period to
+equilibrate the system in the lambda = 0 state. After this the value
+of lambda changes dynamically during the simulation from 0 to 1
+according to the function defined using the keyword <I>function</I>
+(described below), this switching from lambda from 0 to 1 is done in
+<I>t_s</I> steps. Then comes the second equilibration period of <I>t_eq</I> to
+equilibrate the system in the lambda = 1 state. After that, the
+switching back to the lambda = 0 state is made using <I>t_s</I> timesteps
+and following the same switching function. After this period the value
+of lambda is kept equal to zero and the fix has no other effect on the
+dynamics of the system.
+</P>
+<P>The processes described above is known as nonequilibrium thermodynamic
+integration and is has been shown (<A HREF = "#Freitas">Freitas</A>) to present a
+much superior efficiency when compared to standard equilibrium
+methods. The reason why the switching it is made in both directions
+(potential to Einstein crystal and back) is to eliminate the
+dissipated heat due to the nonequilibrium process. Further details
+about nonequilibrium thermodynamic integration and its implementation
+in LAMMPS is available in <A HREF = "#Freitas">Freitas</A>.
+</P>
+<P>The <I>function</I> keyword allows the use of two different lambda
+paths. Option <I>1</I> results in a constant rate of change of lambda with
+time:
+</P>
+<CENTER><IMG SRC = "Eqs/fix_ti_spring_function_1.jpg">
+</CENTER>
+<P>where tau is the scaled time variable <I>t/t_s</I>. The option <I>2</I> performs
+the lambda switching at a rate defined by the following switching
+function
+</P>
+<CENTER><IMG SRC = "Eqs/fix_ti_spring_function_2.jpg">
+</CENTER>
+<P>This function has zero slope as lambda approaches its extreme values
+(0 and 1), according to <A HREF = "#deKoning96">de Koning</A> this results in
+smaller fluctuations on the integral to be computed on the
+thermodynamic integration. The use of option <I>2</I> is recommended since
+it results in better accuracy and less dissipation without any
+increase in computational resources cost.
+</P>
+<P>NOTE: As described in <A HREF = "#Freitas">Freitas</A>, it is important to keep the
+center-of-mass fixed during the thermodynamic integration. A nonzero
+total velocity will result in divergences during the integration due
+to the fact that the atoms are 'attached' to their equilibrium
+positions by the Einstein crystal. Check the option <I>zero</I> of <A HREF = "fix_langevin.html">fix
+langevin</A> and <A HREF = "velocity.html">velocity</A>. The use of
+the Nose-Hoover thermostat (<A HREF = "fix_nh.html">fix nvt</A>) is <I>NOT</I>
+recommended due to its well documented issues with the canonical
+sampling of harmonic degrees of freedom (notice that the <I>chain</I>
+option will <I>NOT</I> solve this problem). The Langevin thermostat (<A HREF = "fix_langevin.html">fix
+langevin</A>) correctly thermostats the system and we
+advise its usage with ti/spring command.
+</P>
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>This fix writes the original coordinates of tethered atoms to <A HREF = "restart.html">binary
+restart files</A>, so that the spring effect will be the
+same in a restarted simulation. See the <A HREF = "read_restart.html">read
+restart</A> command for info on how to re-specify a fix
+in an input script that reads a restart file, so that the operation of
+the fix continues in an uninterrupted fashion.
+</P>
+<P>The <A HREF = "fix_modify.html">fix modify</A> <I>energy</I> option is supported by this
+fix to add the energy stored in the per-atom springs to the system's
+potential energy as part of <A HREF = "thermo_style.html">thermodynamic output</A>.
+</P>
+<P>This fix computes a global scalar and a global vector quantities which
+can be accessed by various <A HREF = "Section_howto.html#howto_15">output
+commands</A>. The scalar is an energy which
+is the sum of the spring energy for each atom, where the per-atom
+energy is 0.5 * k * r^2. The vector has 2 positions, the first one is
+the coupling parameter lambda and the second one is the time
+derivative of lambda. The scalar and vector values calculated by this
+fix are "extensive".
+</P>
+<P>No parameter of this fix can be used with the <I>start/stop</I> keywords of
+the <A HREF = "run.html">run</A> command.
+</P>
+<P>The forces due to this fix are imposed during an energy minimization,
+invoked by the <A HREF = "minimize.html">minimize</A> command.
+</P>
+<P>NOTE: If you want the per-atom spring energy to be included in the
+total potential energy of the system (the quantity being minimized),
+you MUST enable the <A HREF = "fix_modify.html">fix modify</A> <I>energy</I> option for
+this fix.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_spring.html">fix spring</A>, <A HREF = "fix_adapt.html">fix adapt</A>
+</P>
+<P><B>Restrictions:</B>
+</P>
+<P>This fix is part of the USER-MISC package. It is only enabled if
+LAMMPS was built with that package. See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P><B>Default:</B>
+</P>
+<P>The keyword default is function = 1.
+</P>
+<HR>
+
+<A NAME = "Freitas"></A>
+
+<P><B>(Freitas)</B> Freitas, Asta, and de Koning, Computational Materials
+Science, 112, 333 (2016).
+</P>
+<A NAME = "deKoning96"></A>
+
+<P><B>(de Koning)</B> de Koning and Antonelli, Phys Rev E, 53, 465 (1996).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

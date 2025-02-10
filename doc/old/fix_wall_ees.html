@@ -1,0 +1,126 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix wall/ees command 
+</H3>
+<H3>fix wall/region/ees command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID style args 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>style = <I>wall/ees</I> or <I>wall/region/ees</I> 
+
+<PRE>  args for style <I>wall/ees</I>: one or more <I>face parameters</I> groups may be appended
+  face = <I>xlo</I> or <I>xhi</I> or <I>ylo</I> or <I>yhi</I> or <I>zlo</I> or <I>zhi</I>
+  parameters = coord epsilon sigma cutoff
+    coord = position of wall = EDGE or constant or variable
+      EDGE = current lo or hi edge of simulation box
+      constant = number like 0.0 or -30.0 (distance units)
+      variable = <A HREF = "variable.html">equal-style variable</A> like v_x or v_wiggle
+    epsilon = strength factor for wall-particle interaction (energy or energy/distance^2 units)
+      epsilon can be a variable (see below)
+    sigma = size factor for wall-particle interaction (distance units)
+      sigma can be a variable (see below)
+    cutoff = distance from wall at which wall-particle interaction is cut off (distance units) 
+</PRE>
+<PRE>  args for style <I>wall/region/ees</I>: <I>region-ID</I> <I>epsilon</I> <I>sigma</I> <I>cutoff</I>
+    region-ID = region whose boundary will act as wall
+    epsilon = strength factor for wall-particle interaction (energy or energy/distance^2 units)
+    sigma = size factor for wall-particle interaction (distance units)
+    cutoff = distance from wall at which wall-particle interaction is cut off (distance units) 
+</PRE>
+  
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix wallhi all wall/ees xlo -1.0 1.0 1.0 2.5 units box
+fix wallhi all wall/ees xhi EDGE 1.0 1.0 2.5
+fix wallhi all wall/ees v_wiggle 23.2 1.0 1.0 2.5
+fix zwalls all wall/ees zlo 0.0 1.0 1.0 0.858 zhi 40.0 1.0 1.0 0.858 
+</PRE>
+<PRE>fix ees_cube all wall/region/ees myCube 1.0 1.0 2.5 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Fix <I>wall/ees</I> bounds the simulation domain on one or more of its
+faces with a flat wall that interacts with the ellipsoidal atoms in the
+group by generating a force on the atom in a direction perpendicular to
+the wall and a torque parallel with the wall.  The energy of
+wall-particle interactions E is given by:
+</P>
+<CENTER><IMG SRC = "Eqs/fix_wall_ees.jpg">
+</CENTER>
+<P>Introduced by Babadi and Ejtehadi in <A HREF = "#BabadiEjtehadi">(Babadi)</A>. Here,
+<I>r</I> is the distance from the particle to the wall at position <I>coord</I>,
+and Rc is the <I>cutoff</I> distance at which the  particle and wall no
+longer interact. Also,  sigma_n is the distance between center of
+ellipsoid and the nearest point of its surface to the wall  The energy
+of the wall (see the image below).
+</P>
+<CENTER><IMG SRC = "JPG/fix_wall_ees_image.jpg">
+</CENTER>
+<P>Details of using this command and specifications are the same as
+fix/wall command. You can also find an example in USER/ees/ under
+examples/ directory.
+</P>
+<P>The prefactor <I>epsilon</I> can be thought of as an
+effective Hamaker constant with energy units for the strength of the
+ellipsoid-wall interaction.  More specifically, the <I>epsilon</I> pre-factor
+= 8 * pi^2 * rho_wall * rho_ellipsoid * epsilon
+* sigma_a * sigma_b * sigma_c, where epsilon is the LJ parameters for
+the constituent LJ particles and sigma_a, sigma_b, and sigma_c are radii
+of ellipsoidal particles. Rho_wall and rho_ellipsoid are the number
+density of the constituent particles, in the wall and ellipsoid
+respectively, in units of 1/volume.
+</P>
+<P>NOTE: You must insure that r is always bigger than sigma_n for
+all particles in the group, or LAMMPS will generate an error.  This
+means you cannot start your simulation with particles touching the wall
+position <I>coord</I> (r = sigma_n) or with particles penetrating the wall (0 =< r < sigma_n) or with particles on the wrong side of the
+wall (r < 0). 
+</P>
+<P>Fix <I>wall/region/ees</I> treats the surface of the geometric region defined
+by the <I>region-ID</I> as a bounding wall which interacts with nearby
+ellipsoidal particles according to the EES potential introduced above.
+</P>
+<P>Other details of this command are the same as for the <A HREF = "fix_wall_region.html">fix
+wall/region</A> command.  One may also find an example
+of using this fix in the examples/USER/misc/ees/ directory.
+</P>
+<P><B>Restrictions:</B> 
+</P>
+<P>This fix is part of the USER-MISC package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>This fix requires that atoms be ellipsoids as defined by the
+<A HREF = "atom_style.html">atom_style ellipsoid</A> command.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_wall.html">fix wall</A>,
+<A HREF = "pair_resquared.html">pair resquared</A>
+</P>
+<P><B>Default:</B>
+</P>
+<P>none
+</P>
+<HR>
+
+<A NAME = "BabadiEjtehadi"></A>
+
+<P><B>(Babadi)</B> Babadi and Ejtehadi, EPL, 77 (2007) 23002.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

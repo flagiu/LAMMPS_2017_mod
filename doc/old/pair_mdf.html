@@ -1,0 +1,175 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>pair_style lj/mdf command 
+</H3>
+<H3>pair_style buck/mdf command 
+</H3>
+<H3>pair_style lennard/mdf command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>pair_style style args 
+</PRE>
+<UL><LI>style = <I>lj/mdf</I> or <I>buck/mdf</I> or <I>lennard/mdf</I> 
+
+<LI>args = list of arguments for a particular style 
+
+<PRE>  <I>lj/mdf</I> args = cutoff1 cutoff2
+    cutoff1 = inner cutoff for the start of the tapering function
+    cutoff1 = out cutoff for the end of the tapering function
+  <I>buck/mdf</I> args = cutoff1 cutoff2
+    cutoff1 = inner cutoff for the start of the tapering function
+    cutoff1 = out cutoff for the end of the tapering function
+  <I>lennard/mdf</I> args = cutoff1 cutoff2
+    cutoff1 = inner cutoff for the start of the tapering function
+    cutoff1 = out cutoff for the end of the tapering function 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>pair_style lj/mdf 2.5 3.0
+pair_coeff * * 1 1
+pair_coeff 1 1 1 1.1 2.8 3.0 3.2 
+</PRE>
+<PRE>pair_style buck 2.5 3.0
+pair_coeff * * 100.0 1.5 200.0
+pair_coeff * * 100.0 1.5 200.0 3.0 3.5 
+</PRE>
+<PRE>pair_style lennard/mdf 2.5 3.0
+pair_coeff * * 1 1
+pair_coeff 1 1 1 1.1 2.8 3.0 3.2 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>The <I>lj/mdf</I>, <I>buck/mdf</I> and <I>lennard/mdf</I> compute the standard 12-6
+Lennard-Jones and Buckingham potential with the addition of a taper
+function that ramps the energy and force smoothly to zero between an
+inner and outer cutoff.
+</P>
+<CENTER><IMG SRC = "Eqs/pair_mdf-1.jpg">
+</CENTER>
+<P>The tapering, <I>f(r)</I>, is done by using the Mei, Davenport, Fernando
+function <A HREF = "#Mei">(Mei)</A>.
+</P>
+<CENTER><IMG SRC = "Eqs/pair_mdf-2.jpg">
+</CENTER>
+<P>where
+</P>
+<CENTER><IMG SRC = "Eqs/pair_mdf-3.jpg">
+</CENTER>
+<P>Here <I>r_m</I> is the inner cutoff radius and <I>r_cut</I> is the outer cutoff
+radius.
+</P>
+<HR>
+
+<P>For the <I>lj/mdf</I> pair_style, the potential energy, <I>E(r)</I>, is the
+standard 12-6 Lennard-Jones written in the epsilon/sigma form:
+</P>
+<CENTER><IMG SRC = "Eqs/pair_mdf-4.jpg">
+</CENTER>
+<P>The following coefficients must be defined for each pair of atoms
+types via the pair_coeff command as in the examples above, or in the
+data file or restart files read by the <A HREF = "read_data.html">read_data</A> or
+<A HREF = "read_restart.html">read_restart commands</A>, or by mixing as described
+below:
+</P>
+<UL><LI>epsilon (energy units)
+<LI>sigma (distance units)
+<LI>r_m (distance units)
+<LI>r_<I>cut</I> (distance units) 
+</UL>
+<HR>
+
+<P>For the <I>buck/mdf</I> pair_style, the potential energy, <I>E(r)</I>, is the
+standard Buckingham potential:
+</P>
+<CENTER><IMG SRC = "Eqs/pair_mdf-5.jpg">
+</CENTER>
+<UL><LI>A (energy units)
+<LI>\rho (distance units)
+<LI>C (energy-distance^6 units)
+<LI>r_m (distance units)
+<LI>r_<I>cut</I>$ (distance units) 
+</UL>
+<HR>
+
+<P>For the <I>lennard/mdf</I> pair_style, the potential energy, <I>E(r)</I>, is the
+standard 12-6 Lennard-Jones written in the $A/B$ form:
+</P>
+<CENTER><IMG SRC = "Eqs/pair_mdf-6.jpg">
+</CENTER>
+<P>The following coefficients must be defined for each pair of atoms
+types via the pair_coeff command as in the examples above, or in the
+data file or restart files read by the read_data or read_restart
+commands, or by mixing as described below:
+</P>
+<UL><LI>A (energy-distance^12 units)
+<LI>B (energy-distance^6 units)
+<LI>r_m (distance units)
+<LI>r_<I>cut</I> (distance units) 
+</UL>
+<HR>
+
+<P><B>Mixing, shift, table, tail correction, restart, rRESPA info</B>:
+</P>
+<P>For atom type pairs I,J and I != J, the epsilon and sigma coefficients
+and cutoff distance for all of the lj/cut pair styles can be mixed.
+The default mix value is <I>geometric</I>.  See the "pair_modify" command
+for details.
+</P>
+<P>All of the <I>lj/cut</I> pair styles support the
+<A HREF = "pair_modify.html">pair_modify</A> shift option for the energy of the
+Lennard-Jones portion of the pair interaction.
+</P>
+<P>The <I>lj/cut/coul/long</I> and <I>lj/cut/tip4p/long</I> pair styles support the
+<A HREF = "pair_modify.html">pair_modify</A> table option since they can tabulate
+the short-range portion of the long-range Coulombic interaction.
+</P>
+<P>All of the <I>lj/cut</I> pair styles support the
+<A HREF = "pair_modify.html">pair_modify</A> tail option for adding a long-range
+tail correction to the energy and pressure for the Lennard-Jones
+portion of the pair interaction.
+</P>
+<P>All of the <I>lj/cut</I> pair styles write their information to <A HREF = "restart.html">binary
+restart files</A>, so pair_style and pair_coeff commands do
+not need to be specified in an input script that reads a restart file.
+</P>
+<P>The <I>lj/cut</I> and <I>lj/cut/coul/long</I> pair styles support the use of the
+<I>inner</I>, <I>middle</I>, and <I>outer</I> keywords of the <A HREF = "run_style.html">run_style
+respa</A> command, meaning the pairwise forces can be
+partitioned by distance at different levels of the rRESPA hierarchy.
+The other styles only support the <I>pair</I> keyword of run_style respa.
+See the <A HREF = "run_style.html">run_style</A> command for details.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>These pair styles can only be used if LAMMPS was built with the
+USER-MISC package.  See the <A HREF = "Section_start.html#start_3">Making LAMMPS</A>
+section for more info on packages.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_coeff.html">pair_coeff</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Mei"></A>
+
+<P><B>(Mei)</B> Mei, Davenport, Fernando, Phys Rev B, 43 4653 (1991)
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,97 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix filter/corotate command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID filter/corotate keyword value ... 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command 
+
+<LI>one or more constraint/value pairs are appended 
+
+<LI>constraint = <I>b</I> or <I>a</I> or <I>t</I> or <I>m</I> 
+
+<PRE>  <I>b</I> values = one or more bond types
+  <I>a</I> values = one or more angle types
+  <I>t</I> values = one or more atom types
+  <I>m</I> value = one or more mass values 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>timestep 8
+run_style respa 3 2 8 bond 1 pair 2 kspace 3
+fix cor all filter/corotate m 1.0 
+</PRE>
+<PRE>fix cor all filter/corotate b 4 19 a 3 5 2 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>This fix implements a corotational filter for a mollified impulse
+method. In biomolecular simulations, it allows the usage of larger
+timesteps for long-range electrostatic interactions.  For details, see
+<A HREF = "#Fath2017">(Fath)</A>.
+</P>
+<P>When using <A HREF = "run_style.html">run_style respa</A> for a biomolecular
+simulation with high-frequency covalent bonds, the outer time-step is
+restricted to below ~ 4fs due to resonance problems. This fix filters
+the outer stage of the respa and thus a larger (outer) time-step can
+be used. Since in large biomolecular simulations the computation of
+the long-range electrostatic contributions poses a major bottleneck,
+this can significantly accelerate the simulation.
+</P>
+<P>The filter computes a cluster decomposition of the molecular structure
+following the criteria indicated by the options a, b, t and m. This
+process is similar to the approach in <A HREF = "fix_shake.html">fix shake</A>,
+however, the clusters are not kept contrained. Instead, the position
+is slightly modified only for the computation of long-range forces. A
+good cluster decomposition constitutes in building clusters which
+contain the fastest covalent bonds inside clusters.
+</P>
+<P>If the clusters are chosen suitably, the <A HREF = "run_style.html">run_style
+respa</A> is stable for outer time-steps of at least 8fs.
+</P>
+<HR>
+
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>No information about these fixes is written to <A HREF = "restart.html">binary restart
+files</A>.  None of the <A HREF = "fix_modify.html">fix_modify</A> options
+are relevant to these fixes.  No global or per-atom quantities are
+stored by these fixes for access by various <A HREF = "Section_howto.html#howto_15">output
+commands</A>.  No parameter of these fixes
+can be used with the <I>start/stop</I> keywords of the <A HREF = "run.html">run</A>
+command.  These fixes are not invoked during <A HREF = "minimize.html">energy
+minimization</A>.
+</P>
+<P><B>Restrictions:</B>
+</P>
+<P>This fix is part of the USER-MISC package. It is only enabled if
+LAMMPS was built with that package. See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>Currently, it does not support <A HREF = "molecule.html">molecule templates</A>.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Fath2017"></A>
+
+<P><B>(Fath)</B> Fath, Hochbruck, Singh, J Comp Phys, 333, 180-198 (2017).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

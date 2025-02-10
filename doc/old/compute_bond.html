@@ -1,0 +1,59 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>compute bond command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>compute ID group-ID bond 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "compute.html">compute</A> command
+<LI>bond = style name of this compute command 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>compute 1 all bond 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Define a computation that extracts the bond energy calculated by each
+of the bond sub-styles used in the <A HREF = "bond_hybrid.html">bond_style
+hybrid</A> command.  These values are made accessible
+for output or further processing by other commands.  The group
+specified for this command is ignored.
+</P>
+<P>This compute is useful when using <A HREF = "bond_hybrid.html">bond_style hybrid</A>
+if you want to know the portion of the total energy contributed by one
+or more of the hybrid sub-styles.
+</P>
+<P><B>Output info:</B>
+</P>
+<P>This compute calculates a global vector of length N where N is the
+number of sub_styles defined by the <A HREF = "bond_style.html">bond_style
+hybrid</A> command, which can be accessed by indices 1-N.
+These values can be used by any command that uses global scalar or
+vector values from a compute as input.  See <A HREF = "Section_howto.html#howto_15">this
+section</A> for an overview of LAMMPS output
+options.
+</P>
+<P>The vector values are "extensive" and will be in energy
+<A HREF = "units.html">units</A>.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "compute_pe.html">compute pe</A>, <A HREF = "compute_pair.html">compute pair</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

@@ -1,0 +1,155 @@
+<HTML>
+<CENTER><A HREF = "Section_howto.html">Previous Section</A> - <A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> - <A HREF = "Section_perf.html">Next Section</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>7. Example problems 
+</H3>
+<P>The LAMMPS distribution includes an examples sub-directory with many
+sample problems.  Many are 2d models that run quickly are are
+straightforward to visualize, requiring at most a couple of minutes to
+run on a desktop machine.  Each problem has an input script (in.*) and
+produces a log file (log.*) when it runs.  Some use a data file
+(data.*) of initial coordinates as additional input.  A few sample log
+file run on different machines and different numbers of processors are
+included in the directories to compare your answers to.  E.g. a log
+file like log.date.crack.foo.P means the "crack" example was run on P
+processors of machine "foo" on that date (i.e. with that version of
+LAMMPS).
+</P>
+<P>Many of the input files have commented-out lines for creating dump
+files and image files.
+</P>
+<P>If you uncomment the <A HREF = "dump.html">dump</A> command in the input script, a
+text dump file will be produced, which can be animated by various
+<A HREF = "http://lammps.sandia.gov/viz.html">visualization programs</A>.
+</P>
+<P>If you uncomment the <A HREF = "dump.html">dump image</A> command in the input
+script, and assuming you have built LAMMPS with a JPG library, JPG
+snapshot images will be produced when the simulation runs.  They can
+be quickly post-processed into a movie using commands described on the
+<A HREF = "dump_image.html">dump image</A> doc page.
+</P>
+<P>Animations of many of the examples can be viewed on the Movies section
+of the <A HREF = "http://lammps.sandia.gov">LAMMPS web site</A>.
+</P>
+<P>There are two kinds of sub-directories in the examples dir.  Lowercase
+dirs contain one or a few simple, quick-to-run problems.  Uppercase
+dirs contain up to several complex scripts that illustrate a
+particular kind of simulation method or model.  Some of these run for
+longer times, e.g. to measure a particular quantity.
+</P>
+<P>Lists of both kinds of directories are given below.
+</P>
+<HR>
+
+<H4>Lowercase directories 
+</H4>
+<DIV ALIGN=center><TABLE  BORDER=1 >
+<TR><TD >accelerate</TD><TD > run with various acceleration options (OpenMP, GPU, Phi)</TD></TR>
+<TR><TD >airebo</TD><TD >   polyethylene with AIREBO potential</TD></TR>
+<TR><TD >balance</TD><TD >  dynamic load balancing, 2d system</TD></TR>
+<TR><TD >body</TD><TD >     body particles, 2d system</TD></TR>
+<TR><TD >cmap</TD><TD >     CMAP 5-body contributions to CHARMM force field</TD></TR>
+<TR><TD >colloid</TD><TD >  big colloid particles in a small particle solvent, 2d system</TD></TR>
+<TR><TD >comb</TD><TD >     models using the COMB potential</TD></TR>
+<TR><TD >coreshell</TD><TD > core/shell model using CORESHELL package</TD></TR>
+<TR><TD >controller</TD><TD > use of fix controller as a thermostat</TD></TR>
+<TR><TD >crack</TD><TD >    crack propagation in a 2d solid</TD></TR>
+<TR><TD >deposit</TD><TD >  deposit atoms and molecules on a surface</TD></TR>
+<TR><TD >dipole</TD><TD >   point dipolar particles, 2d system</TD></TR>
+<TR><TD >dreiding</TD><TD > methanol via Dreiding FF</TD></TR>
+<TR><TD >eim</TD><TD >      NaCl using the EIM potential</TD></TR>
+<TR><TD >ellipse</TD><TD >  ellipsoidal particles in spherical solvent, 2d system</TD></TR>
+<TR><TD >flow</TD><TD >     Couette and Poiseuille flow in a 2d channel</TD></TR>
+<TR><TD >friction</TD><TD > frictional contact of spherical asperities between 2d surfaces</TD></TR>
+<TR><TD >gcmc</TD><TD >     Grand Canonical Monte Carlo (GCMC) via the fix gcmc command</TD></TR>
+<TR><TD >granregion</TD><TD > use of fix wall/region/gran as boundary on granular particles</TD></TR>
+<TR><TD >hugoniostat</TD><TD > Hugoniostat shock dynamics</TD></TR>
+<TR><TD >indent</TD><TD >   spherical indenter into a 2d solid</TD></TR>
+<TR><TD >kim</TD><TD >      use of potentials in Knowledge Base for Interatomic Models (KIM)</TD></TR>
+<TR><TD >meam</TD><TD >     MEAM test for SiC and shear (same as shear examples)</TD></TR>
+<TR><TD >melt</TD><TD >     rapid melt of 3d LJ system</TD></TR>
+<TR><TD >micelle</TD><TD >  self-assembly of small lipid-like molecules into 2d bilayers</TD></TR>
+<TR><TD >min</TD><TD >      energy minimization of 2d LJ melt</TD></TR>
+<TR><TD >mscg</TD><TD >     parameterize a multi-scale coarse-graining (MSCG) model</TD></TR>
+<TR><TD >msst</TD><TD >     MSST shock dynamics</TD></TR>
+<TR><TD >nb3b</TD><TD >     use of nonbonded 3-body harmonic pair style</TD></TR>
+<TR><TD >neb</TD><TD >      nudged elastic band (NEB) calculation for barrier finding</TD></TR>
+<TR><TD >nemd</TD><TD >     non-equilibrium MD of 2d sheared system</TD></TR>
+<TR><TD >obstacle</TD><TD > flow around two voids in a 2d channel</TD></TR>
+<TR><TD >peptide</TD><TD >  dynamics of a small solvated peptide chain (5-mer)</TD></TR>
+<TR><TD >peri</TD><TD >     Peridynamic model of cylinder impacted by indenter</TD></TR>
+<TR><TD >pour</TD><TD >     pouring of granular particles into a 3d box, then chute flow</TD></TR>
+<TR><TD >prd</TD><TD >      parallel replica dynamics of vacancy diffusion in bulk Si</TD></TR>
+<TR><TD >python</TD><TD >   using embedded Python in a LAMMPS input script</TD></TR>
+<TR><TD >qeq</TD><TD >      use of the QEQ package for charge equilibration</TD></TR>
+<TR><TD >reax</TD><TD >     RDX and TATB models using the ReaxFF</TD></TR>
+<TR><TD >rigid</TD><TD >    rigid bodies modeled as independent or coupled</TD></TR>
+<TR><TD >shear</TD><TD >    sideways shear applied to 2d solid, with and without a void</TD></TR>
+<TR><TD >snap</TD><TD >     NVE dynamics for BCC tantalum crystal using SNAP potential</TD></TR>
+<TR><TD >srd</TD><TD >      stochastic rotation dynamics (SRD) particles as solvent</TD></TR>
+<TR><TD >streitz</TD><TD >  use of Streitz/Mintmire potential with charge equilibration</TD></TR>
+<TR><TD >tad</TD><TD >      temperature-accelerated dynamics of vacancy diffusion in bulk Si</TD></TR>
+<TR><TD >vashishta</TD><TD > use of the Vashishta potential</TD></TR>
+<TR><TD >voronoi</TD><TD >  Voronoi tesselation via compute voronoi/atom command 
+</TD></TR></TABLE></DIV>
+
+<P>Here is how you can run and visualize one of the sample problems:
+</P>
+<PRE>cd indent
+cp ../../src/lmp_linux .           # copy LAMMPS executable to this dir
+lmp_linux -in in.indent            # run the problem 
+</PRE>
+<P>Running the simulation produces the files <I>dump.indent</I> and
+<I>log.lammps</I>.  You can visualize the dump file of snapshots with a
+variety of 3rd-party tools highlighted on the
+<A HREF = "http://lammps.sandia.gov/viz.html">Visualization</A> page of the LAMMPS
+web site.
+</P>
+<P>If you uncomment the <A HREF = "dump_image.html">dump image</A> line(s) in the input
+script a series of JPG images will be produced by the run (assuming
+you built LAMMPS with JPG support; see <A HREF = "Section_start.html#start_2">Section
+2.2</A> for details).  These can be viewed
+individually or turned into a movie or animated by tools like
+ImageMagick or QuickTime or various Windows-based tools.  See the
+<A HREF = "dump_image.html">dump image</A> doc page for more details.  E.g. this
+Imagemagick command would create a GIF file suitable for viewing in a
+browser.
+</P>
+<PRE>% convert -loop 1 *.jpg foo.gif 
+</PRE>
+<HR>
+
+<H4>Uppercase directories 
+</H4>
+<DIV ALIGN=center><TABLE  BORDER=1 >
+<TR><TD >ASPHERE</TD><TD > various aspherical particle models, using ellipsoids, rigid bodies, line/triangle particles, etc</TD></TR>
+<TR><TD >COUPLE</TD><TD > examples of how to use LAMMPS as a library</TD></TR>
+<TR><TD >DIFFUSE</TD><TD > compute diffusion coefficients via several methods</TD></TR>
+<TR><TD >ELASTIC</TD><TD > compute elastic constants at zero temperature</TD></TR>
+<TR><TD >ELASTIC_T</TD><TD > compute elastic constants at finite temperature</TD></TR>
+<TR><TD >KAPPA</TD><TD > compute thermal conductivity via several methods</TD></TR>
+<TR><TD >MC</TD><TD > using LAMMPS in a Monte Carlo mode to relax the energy of a system</TD></TR>
+<TR><TD >USER</TD><TD > examples for USER packages and USER-contributed commands</TD></TR>
+<TR><TD >VISCOSITY</TD><TD > compute viscosity via several methods 
+</TD></TR></TABLE></DIV>
+
+<P>Nearly all of these directories have README files which give more
+details on how to understand and use their contents.
+</P>
+<P>The USER directory has a large number of sub-directories which
+correspond by name to a USER package.  They contain scripts that
+illustrate how to use the command(s) provided in that package.  Many
+of the sub-directories have their own README files which give further
+instructions.  See the <A HREF = "Section_packages.html">Section 4</A> doc
+page for more info on specific USER packages.
+</P>
+<!-- PAGE BREAK -->
+</HTML>

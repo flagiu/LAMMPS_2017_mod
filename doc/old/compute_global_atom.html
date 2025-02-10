@@ -1,0 +1,233 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>compute global/atom command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>compute ID group-ID style index input1 input2 ... 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "compute.html">compute</A> command 
+
+<LI>global/atom = style name of this compute command 
+
+<LI>index = c_ID, c_ID[N], f_ID, f_ID[N], v_name 
+
+<PRE>  c_ID = per-atom vector calculated by a compute with ID
+  c_ID[I] = Ith column of per-atom array calculated by a compute with ID
+  f_ID = per-atom vector calculated by a fix with ID
+  f_ID[I] = Ith column of per-atom array calculated by a fix with ID
+  v_name = per-atom vector calculated by an atom-style variable with name 
+</PRE>
+<LI>one or more inputs can be listed 
+
+<LI>input = c_ID, c_ID[N], f_ID, f_ID[N], v_name 
+
+<PRE>  c_ID = global vector calculated by a compute with ID
+  c_ID[I] = Ith column of global array calculated by a compute with ID, I can include wildcard (see below)
+  f_ID = global vector calculated by a fix with ID
+  f_ID[I] = Ith column of global array calculated by a fix with ID, I can include wildcard (see below)
+  v_name = global vector calculated by a vector-style variable with name 
+</PRE>
+
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>compute 1 all global/atom c_chunk c_com[1\] c_com[2\] c_com[3\]
+compute 1 all global/atom c_chunk c_com[*\] 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Define a calculation that assigns global values to each atom from
+vectors or arrays of global values.  The specified <I>index</I> parameter
+is used to determine which global value is assigned to each atom.
+</P>
+<P>The <I>index</I> parameter must reference a per-atom vector or array from a
+<A HREF = "compute.html">compute</A> or <A HREF = "fix.html">fix</A> or the evaluation of an
+atom-style <A HREF = "variable.html">variable</A>.  Each <I>input</I> value must
+reference a global vector or array from a <A HREF = "compute.html">compute</A> or
+<A HREF = "fix.html">fix</A> or the evaluation of an vector-style
+<A HREF = "variable.html">variable</A>.  Details are given below.
+</P>
+<P>The <I>index</I> value for an atom is used as a index I (from 1 to N) into
+the vector associated with each of the input values.  The Ith value
+from the input vector becomes one output value for that atom.  If the
+atom is not in the specified group, or the index I < 1 or I > M, where
+M is the actual length of the input vector, then an output value of
+0.0 is assigned to the atom.
+</P>
+<P>An example of how this command is useful, is in the context of
+"chunks" which are static or dynamic subsets of atoms.  The <A HREF = "compute_chunk_atom.html">compute
+chunk/atom</A> command assigns unique chunk IDs
+to each atom.  It's output can be used as the <I>index</I> parameter for
+this command.  Various other computes with "chunk" in their style
+name, such as <A HREF = "compute_com_chunk.html">compute com/chunk</A> or <A HREF = "compute_msd_chunk.html">compute
+msd/chunk</A>, calculate properties for each
+chunk.  The output of these commands are global vectors or arrays,
+with one or more values per chunk, and can be used as input values for
+this command.  This command will then assign the global chunk value to
+each atom in the chunk, producing a per-atom vector or per-atom array
+as output.  The per-atom values can then be output to a dump file or
+used by any command that uses per-atom values from a compute as input,
+as discussed in <A HREF = "Section_howto.html#howto_15">Section 6.15</A>.
+</P>
+<P>As a concrete example, these commands will calculate the displacement
+of each atom from the center-of-mass of the molecule it is in, and
+dump those values to a dump file.  In this case, each molecule is a
+chunk.
+</P>
+<PRE>compute cc1 all chunk/atom molecule
+compute myChunk all com/chunk cc1
+compute prop all property/atom xu yu zu
+compute glob all global/atom c_cc1 c_myChunk[*]
+variable dx atom c_prop[1]-c_glob[1]
+variable dy atom c_prop[2]-c_glob[2]
+variable dz atom c_prop[3]-c_glob[3]
+variable dist atom sqrt(v_dx*v_dx+v_dy*v_dy+v_dz*v_dz)
+dump 1 all custom 100 tmp.dump id xu yu zu c_glob[1] c_glob[2] c_glob[3] &
+     v_dx v_dy v_dz v_dist
+dump_modify 1 sort id 
+</PRE>
+<P>You can add these commands to the bench/in.chain script to see how
+they work.
+</P>
+<HR>
+
+<P>Note that for input values from a compute or fix, the bracketed index
+I can be specified using a wildcard asterisk with the index to
+effectively specify multiple values.  This takes the form "*" or "*n"
+or "n*" or "m*n".  If N = the size of the vector (for <I>mode</I> = scalar)
+or the number of columns in the array (for <I>mode</I> = vector), then an
+asterisk with no numeric values means all indices from 1 to N.  A
+leading asterisk means all indices from 1 to n (inclusive).  A
+trailing asterisk means all indices from n to N (inclusive).  A middle
+asterisk means all indices from m to n (inclusive).
+</P>
+<P>Using a wildcard is the same as if the individual columns of the array
+had been listed one by one.  E.g. these 2 compute global/atom commands
+are equivalent, since the <A HREF = "compute_com_chunk.html">compute com/chunk</A>
+command creates a global array with 3 columns:
+</P>
+<PRE>compute cc1 all chunk/atom molecule
+compute com all com/chunk cc1
+compute 1 all global/atom c_cc1 c_com[1] c_com[2] c_com[3]
+compute 1 all global/atom c_cc1 c_com[*] 
+</PRE>
+<HR>
+
+<P>This section explains the <I>index</I> parameter.  Note that it must
+reference per-atom values, as contrasted with the <I>input</I> values which
+must reference global values.
+</P>
+<P>Note that all of these options generate floating point values.  When
+they are used as an index into the specified input vectors, they
+simple rounded down to convert the value to integer indices.  The
+final values should range from 1 to N (inclusive), since they are used
+to access values from N-length vectors.
+</P>
+<P>If <I>index</I> begins with "c_", a compute ID must follow which has been
+previously defined in the input script.  The compute must generate
+per-atom quantities.  See the individual <A HREF = "compute.html">compute</A> doc
+page for details.  If no bracketed integer is appended, the per-atom
+vector calculated by the compute is used.  If a bracketed integer is
+appended, the Ith column of the per-atom array calculated by the
+compute is used.  Users can also write code for their own compute
+styles and <A HREF = "Section_modify.html">add them to LAMMPS</A>.  See the
+discussion above for how I can be specified with a wildcard asterisk
+to effectively specify multiple values.
+</P>
+<P>If <I>index</I> begins with "f_", a fix ID must follow which has been
+previously defined in the input script.  The Fix must generate
+per-atom quantities.  See the individual <A HREF = "fix.html">fix</A> doc page for
+details.  Note that some fixes only produce their values on certain
+timesteps, which must be compatible with when compute global/atom
+references the values, else an error results.  If no bracketed integer
+is appended, the per-atom vector calculated by the fix is used.  If a
+bracketed integer is appended, the Ith column of the per-atom array
+calculated by the fix is used.  Users can also write code for their
+own fix style and <A HREF = "Section_modify.html">add them to LAMMPS</A>.  See the
+discussion above for how I can be specified with a wildcard asterisk
+to effectively specify multiple values.
+</P>
+<P>If <I>index</I> begins with "v_", a variable name must follow which has
+been previously defined in the input script.  It must be an
+<A HREF = "variable.html">atom-style variable</A>.  Atom-style variables can
+reference thermodynamic keywords and various per-atom attributes, or
+invoke other computes, fixes, or variables when they are evaluated, so
+this is a very general means of generating per-atom quantities to use
+as <I>index</I>.
+</P>
+<HR>
+
+<P>This section explains the kinds of <I>input</I> values that can be used.
+Note that inputs reference global values, as contrasted with the
+<I>index</I> parameter which must reference per-atom values.
+</P>
+<P>If a value begins with "c_", a compute ID must follow which has been
+previously defined in the input script.  The compute must generate a
+global vector or array.  See the individual <A HREF = "compute.html">compute</A> doc
+page for details.  If no bracketed integer is appended, the vector
+calculated by the compute is used.  If a bracketed integer is
+appended, the Ith column of the array calculated by the compute is
+used.  Users can also write code for their own compute styles and <A HREF = "Section_modify.html">add
+them to LAMMPS</A>.  See the discussion above for how
+I can be specified with a wildcard asterisk to effectively specify
+multiple values.
+</P>
+<P>If a value begins with "f_", a fix ID must follow which has been
+previously defined in the input script.  The fix must generate a
+global vector or array.  See the individual <A HREF = "fix.html">fix</A> doc page
+for details.  Note that some fixes only produce their values on
+certain timesteps, which must be compatible with when compute
+global/atom references the values, else an error results.  If no
+bracketed integer is appended, the vector calculated by the fix is
+used.  If a bracketed integer is appended, the Ith column of the array
+calculated by the fix is used.  Users can also write code for their
+own fix style and <A HREF = "Section_modify.html">add them to LAMMPS</A>.  See the
+discussion above for how I can be specified with a wildcard asterisk
+to effectively specify multiple values.
+</P>
+<P>If a value begins with "v_", a variable name must follow which has
+been previously defined in the input script.  It must be a
+<A HREF = "variable.html">vector-style variable</A>.  Vector-style variables can
+reference thermodynamic keywords and various other attributes of
+atoms, or invoke other computes, fixes, or variables when they are
+evaluated, so this is a very general means of generating a vector of
+global quantities which the <I>index</I> parameter will reference for
+assignment of global values to atoms.
+</P>
+<HR>
+
+<P><B>Output info:</B>
+</P>
+<P>If a single input is specified this compute produces a per-atom
+vector.  If multiple inputs are specified, this compute produces a
+per-atom array values, where the number of columns is equal to the
+number of inputs specified.  These values can be used by any command
+that uses per-atom vector or array values from a compute as input.
+See <A HREF = "Section_howto.html#howto_15">Section 6.15</A> for an overview of
+LAMMPS output options.
+</P>
+<P>The per-atom vector or array values will be in whatever units the
+corresponding input values are in.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "compute.html">compute</A>, <A HREF = "fix.html">fix</A>, <A HREF = "variable.html">variable</A>,
+<A HREF = "compute_chunk_atom.html">compute chunk/atom</A>, <A HREF = "compute_reduce.html">compute
+reduce</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>

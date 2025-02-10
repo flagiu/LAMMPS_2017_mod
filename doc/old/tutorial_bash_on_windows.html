@@ -1,0 +1,215 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>Using LAMMPS with Bash on Windows 
+</H3>
+<P><B>written by Richard Berger</B>
+</P>
+<HR>
+
+<P>Starting with Windows 10 you can install Linux tools directly in Windows. This
+allows you to compile LAMMPS following the same procedure as on a real Ubuntu
+Linux installation. Software can be easily installed using the package manager
+via apt-get and all files are accessible in both the Windows Explorer and your
+Linux shell (bash). This avoids switching to a different operating system or
+installing a virtual machine. Everything runs on Windows.
+</P>
+<H4>Installing Bash on Windows 
+</H4>
+<H5>Prerequisites 
+</H5>
+<UL><LI>Windows 10 (64bit only)
+<LI>Latest updates installed 
+</UL>
+<H5>Enable developer mode 
+</H5>
+<P>You enable this feature by first opening Windows Settings and enabling
+Developer mode. Go to the Windows settings and search for "developer". This
+will allow you to install software which comes from outside of the Windows
+Store.  You might be prompted to reboot your compute. Please do so.
+</P>
+<A HREF = "JPG/bow_tutorial_01.png"><IMG SRC = "JPG/bow_tutorial_01_small.png"></A>
+
+<A HREF = "JPG/bow_tutorial_02.png"><IMG SRC = "JPG/bow_tutorial_02_small.png"></A>
+
+<A HREF = "JPG/bow_tutorial_03.png"><IMG SRC = "JPG/bow_tutorial_03_small.png"></A>
+
+<H5>Install Windows Subsystem for Linux 
+</H5>
+<P>Next you must ensure that the Window Subsystem for Linux is installed. Again,
+search for "enable windows features" in the Settings dialog. This opens a
+dialog with a list of features you can install. Add a checkmark to Windows
+Subsystem for Linux (Beta) and press OK.   
+</P>
+<A HREF = "JPG/bow_tutorial_04.png"><IMG SRC = "JPG/bow_tutorial_04_small.png"></A>
+
+<A HREF = "JPG/bow_tutorial_05.png"><IMG SRC = "JPG/bow_tutorial_05.png"></A>
+
+<H5>Install Bash for Windows 
+</H5>
+<P>After installation completes, type "bash" in the Windows Start menu search.
+Select the first found option. This will launch a command-line window which
+will prompt you about installing Ubuntu on Windows. Confirm with "y" and press
+enter. This will then download Ubuntu for Windows.
+</P>
+<IMG SRC = "JPG/bow_tutorial_06.png">
+
+<IMG SRC = "JPG/bow_tutorial_07.png">
+
+<P>During installation, you will be asked for a new password. This will be used
+for installing new software and running commands with sudo.
+</P>
+<IMG SRC = "JPG/bow_tutorial_08.png">
+
+<P>Type exit to close the command-line window.
+</P>
+<P>Go to the Start menu and type "bash" again. This time you will see a "Bash on
+Ubuntu on Windows" Icon. Start this program.
+</P>
+<IMG SRC = "JPG/bow_tutorial_09.png">
+
+<P>Congratulations, you have installed <B>Bash on Ubuntu on Windows</B>.
+</P>
+<IMG SRC = "JPG/bow_tutorial_10.png">
+
+<HR>
+
+<H4>Compiling LAMMPS in Bash on Windows 
+</H4>
+<P>The installation of LAMMPS in this environment is identical to working inside
+of a real Ubuntu Linux installation. At the time writing, it uses Ubuntu 16.04.
+</P>
+<H5>Installing prerequisite packages 
+</H5>
+<P>First upgrade all existing packages using
+</P>
+<PRE>sudo apt update
+sudo apt upgrade -y 
+</PRE>
+<P>Next install the following packages, which include compilers and libraries
+needed for various LAMMPS features:
+</P>
+<PRE>sudo apt install -y build-essential ccache gfortran openmpi-bin libopenmpi-dev libfftw3-dev libjpeg-dev libpng12-dev python-dev python-virtualenv libblas-dev liblapack-dev libhdf5-serial-dev hdf5-tools 
+</PRE>
+<H5>Files in Ubuntu on Windows 
+</H5>
+<P>When you launch "Bash on Ubuntu on Windows" you will start out in your Linux
+user home directory /home/<B>username</B>. You can access your Windows user directory
+using the /mnt/c/Users/<B>username</B> folder.
+</P>
+<H5>Download LAMMPS 
+</H5>
+<P>Obtain a copy of the LAMMPS code and go into it using "cd"
+</P>
+<H6>Option 1: Downloading LAMMPS tarball using wget 
+</H6>
+<PRE>wget http://lammps.sandia.gov/tars/lammps-stable.tar.gz
+tar xvzf lammps-stable.tar.gz
+cd lammps-31Mar17 
+</PRE>
+<H6>Option 2: Obtaining LAMMPS code from GitHub 
+</H6>
+<PRE>git clone https://github.com/lammps/lammps.git
+cd lammps 
+</PRE>
+<H5>Compiling LAMMPS 
+</H5>
+<P>At this point you can compile LAMMPS like on Ubuntu Linux.
+</P>
+<H6>Compiling serial version 
+</H6>
+<PRE>cd src/
+make -j 4 serial 
+</PRE>
+<P>This will create an executable called lmp_serial in the src/ directory
+</P>
+<H6>Compiling MPI version 
+</H6>
+<PRE>cd src/
+make -j 4 mpi 
+</PRE>
+<P>This will create an executable called lmp_mpi in the src/ directory
+</P>
+<HR>
+
+<P>Finally, please note the absolute path of your src folder. You can get this using
+</P>
+<PRE>pwd 
+</PRE>
+<P>or
+</P>
+<PRE>echo $PWD 
+</PRE>
+<P>To run any examples you need the location of the executable. For now, let us
+save this location in a temporary variable
+</P>
+<PRE>LAMMPS_DIR=$PWD 
+</PRE>
+<HR>
+
+<H5>Running an example script 
+</H5>
+<P>Once compiled you can execute some of the LAMMPS examples. Switch into the
+examples/melt folder
+</P>
+<PRE>cd ../examples/melt 
+</PRE>
+<P>The full path of the serial executable is $LAMMPS_DIR/lmp_serial, while the mpi
+version is $LAMMPS_DIR/lmp_mpi. You can run the melt example with either
+version as follows:
+</P>
+<PRE>$LAMMPS_DIR/lmp_serial -in in.melt 
+</PRE>
+<P>or
+</P>
+<PRE>mpirun -np 4 $LAMMPS_DIR/lmp_mpi -in in.melt 
+</PRE>
+<P>Note the use of our variable $LAMMPS_DIR, which expands into the full path of
+the LAMMPS src folder we saved earlier.
+</P>
+<H6>Adding your executable directory to your PATH 
+</H6>
+<P>You can avoid having to type the full path of your LAMMPS binary by adding its
+parent folder to the PATH environment variable as follows:
+</P>
+<PRE>export PATH=$LAMMPS_DIR:$PATH 
+</PRE>
+<P>Input scripts can then be run like this:
+</P>
+<PRE>lmp_serial -in in.melt 
+</PRE>
+<P>or
+</P>
+<PRE>mpirun -np 4 lmp_mpi -in in.melt 
+</PRE>
+<P>However, this PATH variable will not persist if you close your bash window.
+To persist this setting edit the $HOME/.bashrc file using your favorite editor
+and add this line
+</P>
+<PRE>export PATH=/full/path/to/your/lammps/src:$PATH 
+</PRE>
+<P><B>Example:</B>
+</P>
+<P>For an executable lmp_serial with a full path
+</P>
+<PRE>/home/richard/lammps/src/lmp_serial 
+</PRE>
+<P>the PATH variable should be
+</P>
+<PRE>export PATH=/home/richard/lammps/src:$PATH 
+</PRE>
+<P>NOTE: This should give you a jump start when trying to run LAMMPS on Windows.
+To become effective in this environment I encourage you to look into Linux
+tutorials explaining Bash and Basic Unix commands (e.g., <A HREF = "https://linuxjourney.com">Linux
+Journey</A>)
+</P>
+<!-- PAGE BREAK -->
+</HTML>

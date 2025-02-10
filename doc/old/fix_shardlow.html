@@ -1,0 +1,105 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix shardlow command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID shardlow 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command
+<LI>shardlow = style name of this fix command 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix 1 all shardlow 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Specifies that the Shardlow splitting algorithm (SSA) is to be used to
+integrate the DPD equations of motion.  The SSA splits the integration
+into a stochastic and deterministic integration step.  The fix
+<I>shardlow</I> performs the stochastic integration step and must be used
+in conjunction with a deterministic integrator (e.g. <A HREF = "fix_nve.html">fix
+nve</A> or <A HREF = "fix_nh.html">fix nph</A>).  The stochastic
+integration of the dissipative and random forces is performed prior to
+the deterministic integration of the conservative force. Further
+details regarding the method are provided in <A HREF = "#Lisal">(Lisal)</A> and
+<A HREF = "#Larentzos1sh">(Larentzos1)</A>.
+</P>
+<P>The fix <I>shardlow</I> must be used with the <A HREF = "pair_style.html">pair_style
+dpd/fdt</A> or <A HREF = "pair_style.html">pair_style
+dpd/fdt/energy</A> command to properly initialize the
+fluctuation-dissipation theorem parameter(s) sigma (and kappa, if
+necessary).
+</P>
+<P>Note that numerous variants of DPD can be specified by choosing an
+appropriate combination of the integrator and <A HREF = "pair_style.html">pair_style
+dpd/fdt</A> command.  DPD under isothermal conditions can
+be specified by using fix <I>shardlow</I>, fix <I>nve</I> and pair_style
+<I>dpd/fdt</I>.  DPD under isoenergetic conditions can be specified by
+using fix <I>shardlow</I>, fix <I>nve</I> and pair_style <I>dpd/fdt/energy</I>.  DPD
+under isobaric conditions can be specified by using fix shardlow, fix
+<I>nph</I> and pair_style <I>dpd/fdt</I>.  DPD under isoenthalpic conditions can
+be specified by using fix shardlow, fix <I>nph</I> and pair_style
+<I>dpd/fdt/energy</I>.  Examples of each DPD variant are provided in the
+examples/USER/dpd directory.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>This command is part of the USER-DPD package.  It is only enabled if
+LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>This fix is currently limited to orthogonal simulation cell
+geometries.
+</P>
+<P>This fix must be used with an additional fix that specifies time
+integration, e.g. <A HREF = "fix_nve.html">fix nve</A> or <A HREF = "fix_nh.html">fix nph</A>.
+</P>
+<P>The Shardlow splitting algorithm requires the sizes of the sub-domain
+lengths to be larger than twice the cutoff+skin.  Generally, the
+domain decomposition is dependent on the number of processors
+requested.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_dpd_fdt.html">pair_style dpd/fdt</A>, <A HREF = "fix_eos_cv.html">fix eos/cv</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Lisal"></A>
+
+<P><B>(Lisal)</B> M. Lisal, J.K. Brennan, J. Bonet Avalos, "Dissipative
+particle dynamics as isothermal, isobaric, isoenergetic, and
+isoenthalpic conditions using Shardlow-like splitting algorithms.",
+J. Chem. Phys., 135, 204105 (2011).
+</P>
+<A NAME = "Larentzos1sh"></A>
+
+<P><B>(Larentzos1)</B> J.P. Larentzos, J.K. Brennan, J.D. Moore, M. Lisal and
+W.D. Mattson, "Parallel Implementation of Isothermal and Isoenergetic
+Dissipative Particle Dynamics Using Shardlow-Like Splitting
+Algorithms", Comput. Phys. Commun., 185, 1987-1998 (2014).
+</P>
+<A NAME = "Larentzos2sh"></A>
+
+<P><B>(Larentzos2)</B> J.P. Larentzos, J.K. Brennan, J.D. Moore, and
+W.D. Mattson, "LAMMPS Implementation of Constant Energy Dissipative
+Particle Dynamics (DPD-E)", ARL-TR-6863, U.S. Army Research
+Laboratory, Aberdeen Proving Ground, MD (2014).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

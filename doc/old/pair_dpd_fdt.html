@@ -1,0 +1,163 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>pair_style dpd/fdt command 
+</H3>
+<H3>pair_style dpd/fdt/energy command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>pair_style style args 
+</PRE>
+<UL><LI>style = <I>dpd/fdt</I> or <I>dpd/fdt/energy</I>
+<LI>args = list of arguments for a particular style 
+</UL>
+<PRE>  <I>dpd/fdt</I> args = T cutoff seed
+    T = temperature (temperature units)
+    cutoff = global cutoff for DPD interactions (distance units)
+    seed = random # seed (positive integer)
+  <I>dpd/fdt/energy</I> args = cutoff seed
+    cutoff = global cutoff for DPD interactions (distance units)
+    seed = random # seed (positive integer) 
+</PRE>
+<P><B>Examples:</B>
+</P>
+<PRE>pair_style dpd/fdt 300.0 2.5 34387
+pair_coeff * * 3.0 1.0 2.5 
+</PRE>
+<PRE>pair_style dpd/fdt/energy 2.5 34387
+pair_coeff * * 3.0 1.0 0.1 2.5 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Styles <I>dpd/fdt</I> and <I>dpd/fdt/energy</I> compute the force for dissipative
+particle dynamics (DPD) simulations.  The <I>dpd/fdt</I> style is used to
+perform DPD simulations under isothermal and isobaric conditions,
+while the <I>dpd/fdt/energy</I> style is used to perform DPD simulations
+under isoenergetic and isoenthalpic conditions (see <A HREF = "#Lisal3">(Lisal)</A>).
+For DPD simulations in general, the force on atom I due to atom J is
+given as a sum of 3 terms
+</P>
+<CENTER><IMG SRC = "Eqs/pair_dpd.jpg">
+</CENTER>
+<P>where Fc is a conservative force, Fd is a dissipative force, and Fr is
+a random force.  Rij is a unit vector in the direction Ri - Rj, Vij is
+the vector difference in velocities of the two atoms = Vi - Vj, alpha
+is a Gaussian random number with zero mean and unit variance, dt is
+the timestep size, and w(r) is a weighting factor that varies between
+0 and 1.  Rc is the cutoff.  The weighting factor, omega_ij, varies
+between 0 and 1, and is chosen to have the following functional form:
+</P>
+<CENTER><IMG SRC = "Eqs/pair_dpd_omega.jpg">
+</CENTER>
+<P>Note that alternative definitions of the weighting function exist, but
+would have to be implemented as a separate pair style command.
+</P>
+<P>For style <I>dpd/fdt</I>, the fluctuation-dissipation theorem defines gamma
+to be set equal to sigma*sigma/(2 T), where T is the set point
+temperature specified as a pair style parameter in the above examples.
+The following coefficients must be defined for each pair of atoms types
+via the <A HREF = "pair_coeff.html">pair_coeff</A> command as in the examples above,
+or in the data file or restart files read by the
+<A HREF = "read_data.html">read_data</A> or <A HREF = "read_restart.html">read_restart</A> commands:
+</P>
+<UL><LI>A (force units)
+<LI>sigma (force*time^(1/2) units)
+<LI>cutoff (distance units) 
+</UL>
+<P>The last coefficient is optional.  If not specified, the global DPD
+cutoff is used.
+</P>
+<P>Style <I>dpd/fdt/energy</I> is used to perform DPD simulations
+under isoenergetic and isoenthalpic conditions.  The fluctuation-dissipation
+theorem defines gamma to be set equal to sigma*sigma/(2 dpdTheta), where
+dpdTheta is the average internal temperature for the pair. The particle
+internal temperature is related to the particle internal energy through
+a mesoparticle equation of state (see <A HREF = "fix.html">fix eos</A>). The
+differential internal conductive and mechanical energies are computed
+within style <I>dpd/fdt/energy</I> as:
+</P>
+<CENTER><IMG SRC = "Eqs/pair_dpd_energy.jpg">
+</CENTER>
+<P>where
+</P>
+<CENTER><IMG SRC = "Eqs/pair_dpd_energy_terms.jpg">
+</CENTER>
+<P>Zeta_ij^q is a second Gaussian random number with zero mean and unit
+variance that is used to compute the internal conductive energy. The
+fluctuation-dissipation theorem defines alpha*alpha to be set
+equal to 2*kB*kappa, where kappa is the mesoparticle thermal
+conductivity parameter.   The following coefficients must be defined for
+each pair of atoms types via the <A HREF = "pair_coeff.html">pair_coeff</A>
+command as in the examples above, or in the data file or restart files
+read by the <A HREF = "read_data.html">read_data</A> or <A HREF = "read_restart.html">read_restart</A>
+commands:
+</P>
+<UL><LI>A (force units)
+<LI>sigma (force*time^(1/2) units)
+<LI>kappa (energy*temperature/time units)
+<LI>cutoff (distance units) 
+</UL>
+<P>The last coefficient is optional.  If not specified, the global DPD
+cutoff is used.
+</P>
+<P>The pairwise energy associated with styles <I>dpd/fdt</I> and
+<I>dpd/fdt/energy</I> is only due to the conservative force term Fc, and is
+shifted to be zero at the cutoff distance Rc.  The pairwise virial is
+calculated using only the conservative term.
+</P>
+<P>The forces computed through the <I>dpd/fdt</I> and <I>dpd/fdt/energy</I> styles
+can be integrated with the velocity-Verlet integration scheme or the
+Shardlow splitting integration scheme described by <A HREF = "#Lisal3">(Lisal)</A>.
+In the cases when these pair styles are combined with the
+<A HREF = "fix_shardlow.html">fix shardlow</A>, these pair styles differ from the
+other dpd styles in that the dissipative and random forces are split
+from the force calculation and are not computed within the pair style.
+Thus, only the conservative force is computed by the pair style,
+while the stochastic integration of the dissipative and random forces
+are handled through the Shardlow splitting algorithm approach.  The
+Shardlow splitting algorithm is advantageous, especially when
+performing DPD under isoenergetic conditions, as it allows
+significantly larger timesteps to be taken.
+</P>
+<HR>
+
+<P><B>Restrictions:</B>
+</P>
+<P>These commands are part of the USER-DPD package.  They are only
+enabled if LAMMPS was built with that package.  See the <A HREF = "Section_start.html#start_3">Making
+LAMMPS</A> section for more info.
+</P>
+<P>Pair styles <I>dpd/fdt</I> and <I>dpd/fdt/energy</I> require use of the
+<A HREF = "comm_modify.html">comm_modify vel yes</A> option so that velocites are
+stored by ghost atoms.
+</P>
+<P>Pair style <I>dpd/fdt/energy</I> requires <A HREF = "atom_style.html">atom_style dpd</A>
+to be used in order to properly account for the particle internal
+energies and temperatures.
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "pair_coeff.html">pair_coeff</A>, <A HREF = "fix_shardlow.html">fix shardlow</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<HR>
+
+<A NAME = "Lisal3"></A>
+
+<P><B>(Lisal)</B> M. Lisal, J.K. Brennan, J. Bonet Avalos, "Dissipative
+particle dynamics at isothermal, isobaric, isoenergetic, and
+isoenthalpic conditions using Shardlow-like splitting algorithms.",
+J. Chem. Phys., 135, 204105 (2011).
+</P>
+<!-- PAGE BREAK -->
+</HTML>

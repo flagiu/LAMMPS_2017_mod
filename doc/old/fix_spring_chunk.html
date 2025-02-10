@@ -1,0 +1,92 @@
+<HTML>
+<CENTER><A HREF = "http://lammps.sandia.gov">LAMMPS WWW Site</A> - <A HREF = "Manual.html">LAMMPS Documentation</A> - <A HREF = "Section_commands.html#comm">LAMMPS Commands</A> 
+</CENTER>
+
+
+
+
+
+
+<HR>
+
+<H3>fix spring/chunk command 
+</H3>
+<P><B>Syntax:</B>
+</P>
+<PRE>fix ID group-ID spring/chunk K chunkID comID 
+</PRE>
+<UL><LI>ID, group-ID are documented in <A HREF = "fix.html">fix</A> command
+<LI>spring/chunk = style name of this fix command
+<LI>K = spring constant for each chunk (force/distance units)
+<LI>chunkID = ID of <A HREF = "compute_chunk_atom.html">compute chunk/atom</A> command
+<LI>comID = ID of <A HREF = "compute_com_chunk.html">compute com/chunk</A> command 
+</UL>
+<P><B>Examples:</B>
+</P>
+<PRE>fix restrain all spring/chunk 100 chunkID comID 
+</PRE>
+<P><B>Description:</B>
+</P>
+<P>Apply a spring force to the center-of-mass (COM) of chunks of atoms as
+defined by the <A HREF = "compute_chunk_atom.html">compute chunk/atom</A> command.
+Chunks can be molecules or spatial bins or other groupings of atoms.
+This is a way of tethering each chunk to its initial COM coordinates.
+</P>
+<P>The <I>chunkID</I> is the ID of a compute chunk/atom command defined in the
+input script.  It is used to define the chunks.  The <I>comID</I> is the ID
+of a compute com/chunk command defined in the input script.  It is
+used to compute the COMs of each chunk.
+</P>
+<P>At the beginning of the first <A HREF = "run.html">run</A> or
+<A HREF = "minimize.html">minimize</A> command after this fix is defined, the
+initial COM of each chunk is calculated and stored as R0m, where M is
+the chunk number.  Thereafter, at every timestep (or minimization
+iteration), the current COM of each chunk is calculated as Rm.  A
+restoring force of magnitude K (Rm - R0m) Mi / Mm is applied to each
+atom in each chunk where <I>K</I> is the specified spring constant, Mi is
+the mass of the atom, and Mm is the total mass of all atoms in the
+chunk.  Note that <I>K</I> thus represents the spring constant for the
+total force on each chunk of atoms, not for a spring applied to each
+atom.
+</P>
+<P><B>Restart, fix_modify, output, run start/stop, minimize info:</B>
+</P>
+<P>No information about this fix is written to <A HREF = "restart.html">binary restart
+files</A>.
+</P>
+<P>The <A HREF = "fix_modify.html">fix_modify</A> <I>energy</I> option is supported by this
+fix to add the energy stored in all the springs to the system's potential
+energy as part of <A HREF = "thermo_style.html">thermodynamic output</A>.
+</P>
+<P>The <A HREF = "fix_modify.html">fix_modify</A> <I>respa</I> option is supported by this
+fix. This allows to set at which level of the <A HREF = "run_style.html">r-RESPA</A>
+integrator the fix is adding its forces. Default is the outermost level.
+</P>
+<P>This fix computes a global scalar which can be accessed by various
+<A HREF = "Section_howto.html#howto_15">output commands</A>.  The scalar is the
+energy of all the springs, i.e. 0.5 * K * r^2 per-spring.
+</P>
+<P>The scalar value calculated by this fix is "extensive".
+</P>
+<P>No parameter of this fix can be used with the <I>start/stop</I> keywords of
+the <A HREF = "run.html">run</A> command.
+</P>
+<P>The forces due to this fix are imposed during an energy minimization,
+invoked by the <A HREF = "minimize.html">minimize</A> command.
+</P>
+<P>NOTE: If you want the spring energies to be included in the total
+potential energy of the system (the quantity being minimized), you
+MUST enable the <A HREF = "fix_modify.html">fix_modify</A> <I>energy</I> option for this
+fix.
+</P>
+<P><B>Restrictions:</B> none
+</P>
+<P><B>Related commands:</B>
+</P>
+<P><A HREF = "fix_spring.html">fix spring</A>, <A HREF = "fix_spring_self.html">fix spring/self</A>,
+<A HREF = "fix_spring_rg.html">fix spring/rg</A>
+</P>
+<P><B>Default:</B> none
+</P>
+<!-- PAGE BREAK -->
+</HTML>
